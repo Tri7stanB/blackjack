@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DisplayMode.Companion.Input
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,6 +38,7 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
 
     var mise by remember { mutableIntStateOf(100) }
+    var selected21plus3 by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         game.startGame()
@@ -69,12 +72,12 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
                         winner = game.determineWinner()
                         if (winner == 1) {
                             message = "Gagné ! Tu as battu le méchant croupier."
-                            game.player.money += mise * 2
+                            game.handleWin(2)
                         } else if (winner == 2) {
                             message = "Perdu ! Le méchant croupier vole ton argent"
                         } else {
                             message = "Egalité !"
-                            game.player.money += mise
+                            game.handleDraw()
                         }
                     }
                     Log.d("DEBUG", "Draw button pressed")
@@ -94,13 +97,11 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
                         winner = game.determineWinner()
                         if (winner == 1) {
                             message = "Gagné ! Tu as battu le méchant croupier."
-                            game.player.money += mise * 2
-                        } else if (winner == 2) {
+                            game.handleWin(2)                        } else if (winner == 2) {
                             message = "Perdu ! Le méchant croupier vole ton argent"
                         } else {
                             message = "Egalité !"
-                            game.player.money += mise
-
+                            game.handleDraw()
                         }
                     }
                 },
@@ -113,38 +114,62 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
 
         if (message.isNotEmpty() && game.manche > 1) {
             Text("Résultat : $message", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Button(
-                onClick = {
-                    mise = 50
-                    game.player.money -= mise
-                    gameOver = false
-                    message = ""
-                    game.startGame()
+            Row {
+                Button(
+                    onClick = {
+                        val betOk = game.placeBet(50)
+                        if (betOk) {
+                            gameOver = false
+                            message = ""
+                            game.startGame()
+                        } else {
+                            message = "Mise invalide"
+                        }
+                    }
+                ) {
+                    Text("Jouer 50")
                 }
-            ) {
-                Text("Jouer 50")
+                Button(
+                    onClick = {
+                        val betOk = game.placeBet(100)
+                        if (betOk) {
+                            gameOver = false
+                            message = ""
+                            game.startGame()
+                        } else {
+                            message = "Mise invalide"
+                        }
+                    }
+                ) {
+                    Text("Jouer 100")
+                }
+                Button(
+                    onClick = {
+                        val betOk = game.placeBet(200)
+                        if (betOk) {
+                            gameOver = false
+                            message = ""
+                            game.startGame()
+                        } else {
+                            message = "Mise invalide"
+                        }
+                    }
+                ) {
+                    Text("Jouer 200")
+                }
             }
+
             Button(
                 onClick = {
-                    mise = 100
-                    game.player.money -= mise
-                    gameOver = false
-                    message = ""
-                    game.startGame()
+                    selected21plus3 = !selected21plus3
+                },
+                colors = if (selected21plus3) {
+                    ButtonDefaults.buttonColors(containerColor = Color.Red)
+                } else {
+                    ButtonDefaults.buttonColors(containerColor = Color.Green)
                 }
             ) {
-                Text("Jouer 100")
-            }
-            Button(
-                onClick = {
-                    mise = 200
-                    game.player.money -= mise
-                    gameOver = false
-                    message = ""
-                    game.startGame()
-                }
-            ) {
-                Text("Jouer 200")
+                Text("Mise 21+3")
             }
         }
     }

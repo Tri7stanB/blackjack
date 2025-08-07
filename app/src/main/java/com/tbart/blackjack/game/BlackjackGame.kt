@@ -2,6 +2,7 @@ package com.tbart.blackjack.game
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tbart.blackjack.model.Card
 import com.tbart.blackjack.model.Dealer
@@ -14,11 +15,23 @@ class BlackjackGame {
     private val dealer = Dealer()
     var manche = 1
 
+    var mise: Int = 100
+        private set
+
     var playerScore by mutableIntStateOf(0)
         private set
 
     var dealerScore by mutableIntStateOf(0)
         private set
+
+    fun placeBet(amount: Int): Boolean {
+        return if (amount > 0 && amount <= player.money) {
+            mise = amount
+            true
+        } else {
+            false
+        }
+    }
 
     fun startGame(){
         player.hand.clear()
@@ -26,12 +39,23 @@ class BlackjackGame {
         deck.createDeck()
         deck.shuffle()
         manche++
+        player.money -= mise
 
         repeat(2) {
             player.hand.addCard(deck.drawCard(), revealed = true)
         }
         dealer.hand.addCard(deck.drawCard(), true)
         dealer.hand.addCard(deck.drawCard(), false)
+
+        if(checkForThreeCardsFlush()) {
+            player.money += mise*30
+        } else if(checkForBrelan()) {
+            player.money += mise*20
+        } else if(checkForSuite()) {
+            player.money += mise*10
+        } else if(checkForColor()) {
+            player.money += mise*5
+        }
 
         updateScores()
 
@@ -59,6 +83,72 @@ class BlackjackGame {
         }
     }
 
+    fun checkForBlackjackForPlayer(): Boolean {
+        return player.hand.getScore() == 21
+    }
+
+    fun checkForBlackjackForDealer(): Boolean {
+        return dealer.hand.getScore() == 21
+    }
+
+    fun checkForThreeCardsFlush(): Boolean {
+        val playerCards = player.hand.getCardsRevealed().toMutableList()
+        playerCards.addAll(dealer.hand.getCardsRevealed())
+
+        val groupsBySuit = playerCards.groupBy { it.suit }
+
+        groupsBySuit.forEach { (_, cards) ->
+            if (cards.size >= 3) {
+                val sortedRanks = cards.map { it.rank.sequenceValue() }.sorted()
+
+                for (i in 0..sortedRanks.size - 3) {
+                    if (sortedRanks[i] + 1 == sortedRanks[i + 1] &&
+                        sortedRanks[i] + 2 == sortedRanks[i + 2]) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    fun checkForBrelan(): Boolean {
+        val playerCards = player.hand.getCardsRevealed().toMutableList()
+        playerCards.addAll(dealer.hand.getCardsRevealed())
+        if (playerCards[0].rank.sequenceValue() == playerCards[1].rank.sequenceValue() &&
+            playerCards[1].rank.sequenceValue() == playerCards[2].rank.sequenceValue()) {
+            return true
+        }
+        return false
+    }
+
+    fun checkForSuite(): Boolean {
+        val playerCards = player.hand.getCardsRevealed().toMutableList()
+        playerCards.addAll(dealer.hand.getCardsRevealed())
+        playerCards.sortBy { it.rank.sequenceValue() }
+        for (i in 0 until playerCards.size - 2) {
+            if (playerCards[i].rank.sequenceValue() + 1 == playerCards[i + 1].rank.sequenceValue() &&
+                playerCards[i + 1].rank.sequenceValue() + 1 == playerCards[i + 2].rank.sequenceValue()) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun checkForColor(): Boolean {
+        val playerCards = player.hand.getCardsRevealed().toMutableList()
+        playerCards.addAll(dealer.hand.getCardsRevealed())
+
+        val groupsBySuit = playerCards.groupBy { it.suit }
+
+        groupsBySuit.forEach { (_, cards) ->
+            if (cards.size == 3) {
+                return true
+            }
+        }
+        return false
+    }
+
     fun getPlayerCards(): List<Card> = player.hand.getCardsRevealed()
     fun getDealerCards(): List<Card> = dealer.hand.getCardsRevealed()
 
@@ -76,5 +166,13 @@ class BlackjackGame {
             dealerScore > playerScore -> 2
             else -> 0
         }
+    }
+
+    fun handleWin(multiplier: Int) {
+        player.money += mise * multiplier
+    }
+
+    fun handleDraw() {
+        player.money += mise
     }
 }
