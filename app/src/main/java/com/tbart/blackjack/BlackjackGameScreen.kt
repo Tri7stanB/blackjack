@@ -37,7 +37,6 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
     var winner by remember { mutableIntStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
 
-    var mise by remember { mutableIntStateOf(100) }
     var selected21plus3 by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -122,6 +121,9 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
                             gameOver = false
                             message = ""
                             game.startGame()
+                            if (selected21plus3) {
+                                game.player.money -= game.mise
+                            }
                         } else {
                             message = "Mise invalide"
                         }
@@ -136,6 +138,9 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
                             gameOver = false
                             message = ""
                             game.startGame()
+                            if (selected21plus3) {
+                                game.player.money -= game.mise
+                            }
                         } else {
                             message = "Mise invalide"
                         }
@@ -150,6 +155,9 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
                             gameOver = false
                             message = ""
                             game.startGame()
+                            if (selected21plus3) {
+                                game.player.money -= game.mise
+                            }
                         } else {
                             message = "Mise invalide"
                         }
@@ -170,6 +178,11 @@ fun BlackjackGameScreen(modifier: Modifier = Modifier) {
                 }
             ) {
                 Text("Mise 21+3")
+            }
+            if (selected21plus3) {
+                Text("Mise 21+3 active")
+            } else {
+                Text("Mise 21+3 inactive")
             }
         }
     }

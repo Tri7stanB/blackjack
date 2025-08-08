@@ -41,6 +41,7 @@ class BlackjackGame {
         manche++
         player.money -= mise
 
+
         repeat(2) {
             player.hand.addCard(deck.drawCard(), revealed = true)
         }
