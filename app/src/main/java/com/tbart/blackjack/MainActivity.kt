@@ -11,18 +11,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.tbart.blackjack.ui.theme.BlackJackTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+// 1. On active le mode plein écran
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        // 2. On masque les barres (Status bars = haut, Navigation = bas)
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+        // 3. On permet de les faire réapparaître d'un simple "swipe" sans décaler le layout
+        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         setContent {
-            BlackJackTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    BlackjackGameScreen(modifier = Modifier.padding(innerPadding))
-                }
-            }
+            Navigation()
         }
     }
 }
