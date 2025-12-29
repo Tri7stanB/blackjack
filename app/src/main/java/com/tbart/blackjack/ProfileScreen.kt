@@ -14,6 +14,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +33,16 @@ fun ProfileScreen(navController: NavController) {
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Blackjack Menu", modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                NavigationDrawerItem(
+                    label = { Text("Menu") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close() // 1. On ferme le menu
+                            navController.navigate(Screen.MenuScreen.route)
+                        }
+                    }
+                )
                 NavigationDrawerItem(
                     label = { Text("Jouer") },
                     selected = false,
@@ -60,8 +71,14 @@ fun ProfileScreen(navController: NavController) {
         Scaffold(
             topBar = {
                 // Optionnel : Une petite barre pour ouvrir le menu
-                Button(onClick = { scope.launch { drawerState.open() } }) {
-                    Text("≡")
+                Button(
+                    onClick = { scope.launch { drawerState.open() }},
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    )
+
+                ) {
+                    Text("≡", color = Color.Black, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
             }
         ) { innerPadding ->

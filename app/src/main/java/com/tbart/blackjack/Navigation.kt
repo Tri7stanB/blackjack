@@ -8,7 +8,10 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.GameScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.MenuScreen.route) {
+        composable(route = Screen.MenuScreen.route) {
+            MenuScreen(navController)
+        }
         composable(route = Screen.GameScreen.route) {
             BlackjackGameScreen(navController)
         }

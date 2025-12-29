@@ -1,5 +1,6 @@
 package com.tbart.blackjack
 
+import android.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,8 +31,10 @@ import androidx.compose.ui.unit.sp
 import com.tbart.blackjack.game.BlackjackGame
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -39,10 +42,10 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.navigation.NavHostController
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun BlackjackGameScreen(navController: NavHostController) {
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.GameScreen) }
+fun BlackjackGameScreen(navController: NavHostController, gameViewModel: BlackjackViewModel = viewModel()) {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -54,6 +57,16 @@ fun BlackjackGameScreen(navController: NavHostController) {
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Blackjack Menu", modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                NavigationDrawerItem(
+                    label = { Text("Menu") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close() // 1. On ferme le menu
+                            navController.navigate(Screen.MenuScreen.route)
+                        }
+                    }
+                )
                 NavigationDrawerItem(
                     label = { Text("Jouer") },
                     selected = false,
@@ -74,34 +87,42 @@ fun BlackjackGameScreen(navController: NavHostController) {
                         }
                     }
                 )
-                // Ajoutez d'autres items ici...
             }
         }
     ) {
         // Le contenu principal de votre jeu
         Scaffold(
             topBar = {
-                // Optionnel : Une petite barre pour ouvrir le menu
-                Button(onClick = { scope.launch { drawerState.open() } }) {
-                    Text("≡")
+                Button(
+                    onClick = { scope.launch { drawerState.open() }},
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    )
+
+                ) {
+                    Text("≡", color = Color.Black, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
             }
         ) { innerPadding ->
             // On appelle votre interface actuelle ici
-            BlackjackContent(Modifier.padding(innerPadding))
+            BlackjackContent(Modifier.padding(innerPadding), gameViewModel)
+        }
+
+        Scaffold( /* ... */ ) { innerPadding ->
+            // On passe le ViewModel au contenu
+            BlackjackContent(
+                modifier = Modifier.padding(innerPadding),
+                viewModel = gameViewModel
+            )
         }
     }
 }
 
 
 @Composable
-fun BlackjackContent(modifier: Modifier = Modifier) {
-    val game = remember { BlackjackGame() }
-    var gameOver by remember { mutableStateOf(false) }
-    var message by remember { mutableStateOf("") }
-    var winner by remember { mutableIntStateOf(0) }
+fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewModel) {
+    val game = viewModel.game
     val coroutineScope = rememberCoroutineScope()
-    var selected21plus3 by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { game.startGame() }
 
@@ -118,7 +139,15 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
         Row() {
             Spacer(modifier = Modifier.weight(1f))
 
-            Text("Argent : ${game.player.money}", color = Color.Yellow, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Box (
+                modifier = Modifier
+                    .background(Color(0xFF333333), shape = RoundedCornerShape(16.dp))
+                    .padding(8.dp)
+            )
+            {
+                Text("Argent : ${game.player.money}", color = Color.Yellow, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+
+        }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -156,12 +185,12 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
                 onClick = {
                     game.playerHits()
                     if (game.isPlayerBusted()) {
-                        gameOver = true
-                        winner = game.determineWinner()
-                        message = if (winner == 1) {
+                        viewModel.gameOver = true
+                        viewModel.winner = game.determineWinner()
+                        viewModel.message = if (viewModel.winner == 1) {
                             game.handleWin(2)
                             "🎉 Gagné !"
-                        } else if (winner == 2) {
+                        } else if (viewModel.winner == 2) {
                             "💀 Perdu !"
                         } else {
                             game.handleDraw()
@@ -169,7 +198,7 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
                         }
                     }
                 },
-                enabled = !gameOver,
+                enabled = !viewModel.gameOver,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5))
             ) {
                 Text("Tirer", color = Color.White)
@@ -179,12 +208,12 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
                 onClick = {
                     coroutineScope.launch {
                         game.dealerTurn()
-                        gameOver = true
-                        winner = game.determineWinner()
-                        message = if (winner == 1) {
+                        viewModel.gameOver = true
+                        viewModel.winner = game.determineWinner()
+                        viewModel.message = if (viewModel.winner == 1) {
                             game.handleWin(2)
                             "🎉 Gagné !"
-                        } else if (winner == 2) {
+                        } else if (viewModel.winner == 2) {
                             "💀 Perdu !"
                         } else {
                             game.handleDraw()
@@ -192,7 +221,7 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
                         }
                     }
                 },
-                enabled = !gameOver,
+                enabled = !viewModel.gameOver,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
             ) {
                 Text("Rester", color = Color.White)
@@ -200,20 +229,20 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
         }
 
         // --- Zone Résultat & Relance ---
-        if (message.isNotEmpty() && game.manche > 1) {
-            Text("Résultat : $message", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.White)
+        if (viewModel.message.isNotEmpty() && game.manche > 1) {
+            Text("Résultat : ${viewModel.message}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.White)
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 listOf(50, 100, 200).forEach { mise ->
                     Button(
                         onClick = {
                             if (game.placeBet(mise)) {
-                                gameOver = false
-                                message = ""
+                                viewModel.gameOver = false
+                                viewModel.message = ""
                                 game.startGame()
-                                if (selected21plus3) game.player.money -= game.mise
+                                if (viewModel.selected21plus3) game.player.money -= game.mise
                             } else {
-                                message = "Mise invalide"
+                                viewModel.message = "Mise invalide"
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C))
@@ -224,9 +253,9 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
             }
 
             Button(
-                onClick = { selected21plus3 = !selected21plus3 },
+                onClick = { viewModel.selected21plus3 = !viewModel.selected21plus3 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selected21plus3) Color.Green else Color.Red
+                    containerColor = if (viewModel.selected21plus3) Color.Green else Color.Red
                 ),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
@@ -234,7 +263,7 @@ fun BlackjackContent(modifier: Modifier = Modifier) {
             }
 
             Text(
-                if (selected21plus3) "Mise 21+3 active" else "Mise 21+3 inactive",
+                if (viewModel.selected21plus3) "Mise 21+3 active" else "Mise 21+3 inactive",
                 color = Color.White
             )
         }
