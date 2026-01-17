@@ -1,5 +1,7 @@
 package com.tbart.blackjack.game
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +36,11 @@ class BlackjackGame {
     }
 
     fun startGame(){
+
+//        if (player.money<mise){
+//            throw IllegalArgumentException("Le joueur n'a pas assez d'argent pour miser")
+//        }
+
         player.hand.clear()
         dealer.hand.clear()
         deck.createDeck()
@@ -48,15 +55,15 @@ class BlackjackGame {
         dealer.hand.addCard(deck.drawCard(), true)
         dealer.hand.addCard(deck.drawCard(), false)
 
-        if(checkForThreeCardsFlush()) {
-            player.money += mise*30
-        } else if(checkForBrelan()) {
-            player.money += mise*20
-        } else if(checkForSuite()) {
-            player.money += mise*10
-        } else if(checkForColor()) {
-            player.money += mise*5
-        }
+//        if(checkForThreeCardsFlush()) {
+//            player.money += mise*30
+//        } else if(checkForBrelan()) {
+//            player.money += mise*20
+//        } else if(checkForSuite()) {
+//            player.money += mise*10
+//        } else if(checkForColor()) {
+//            player.money += mise*5
+//        }
 
         updateScores()
 

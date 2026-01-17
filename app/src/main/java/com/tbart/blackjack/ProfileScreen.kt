@@ -32,9 +32,8 @@ fun ProfileScreen(navController: NavController) {
             // C'est ici que vous dessinez le contenu de votre menu
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Blackjack Menu", modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 NavigationDrawerItem(
-                    label = { Text("Menu") },
+                    label = { Text("Menu", fontSize = 20.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -44,7 +43,7 @@ fun ProfileScreen(navController: NavController) {
                     }
                 )
                 NavigationDrawerItem(
-                    label = { Text("Jouer") },
+                    label = { Text("Jouer", fontSize = 20.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -54,7 +53,17 @@ fun ProfileScreen(navController: NavController) {
                     }
                 )
                 NavigationDrawerItem(
-                    label = { Text("Profil") },
+                    label = { Text("Historique", fontSize = 20.sp) },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screen.HistoryScreen.route)
+                        }
+                    }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Profil", fontSize = 20.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
