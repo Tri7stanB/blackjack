@@ -26,7 +26,7 @@ fun MenuScreen(navController: androidx.navigation.NavHostController) {
             )
 
         ) {
-            Text("Nouvelle Partie", fontSize = 28.sp)
+            Text("Jouer", fontSize = 28.sp)
         }
     }
 }

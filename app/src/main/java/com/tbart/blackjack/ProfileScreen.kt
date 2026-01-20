@@ -19,12 +19,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val auth = Firebase.auth
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -32,16 +35,6 @@ fun ProfileScreen(navController: NavController) {
             // C'est ici que vous dessinez le contenu de votre menu
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
-                NavigationDrawerItem(
-                    label = { Text("Menu", fontSize = 20.sp) },
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close() // 1. On ferme le menu
-                            navController.navigate(Screen.MenuScreen.route)
-                        }
-                    }
-                )
                 NavigationDrawerItem(
                     label = { Text("Jouer", fontSize = 20.sp) },
                     selected = false,
@@ -97,6 +90,12 @@ fun ProfileScreen(navController: NavController) {
                 modifier = Modifier.padding(innerPadding).padding(16.dp),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
+                modifier = Modifier.padding(innerPadding).padding(16.dp),
+                fontSize = 18.sp
             )
         }
     }

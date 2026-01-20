@@ -36,16 +36,6 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 NavigationDrawerItem(
-                    label = { Text("Menu", fontSize = 20.sp) },
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close() // 1. On ferme le menu
-                            navController.navigate(Screen.MenuScreen.route)
-                        }
-                    }
-                )
-                NavigationDrawerItem(
                     label = { Text("Jouer", fontSize = 20.sp) },
                     selected = false,
                     onClick = {

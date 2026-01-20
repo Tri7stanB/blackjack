@@ -58,16 +58,6 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 NavigationDrawerItem(
-                    label = { Text("Menu", fontSize = 20.sp) },
-                    selected = false,
-                    onClick = {
-                        scope.launch {
-                            drawerState.close() // 1. On ferme le menu
-                            navController.navigate(Screen.MenuScreen.route)
-                        }
-                    }
-                )
-                NavigationDrawerItem(
                     label = { Text("Jouer", fontSize = 20.sp) },
                     selected = false,
                     onClick = {
@@ -313,20 +303,20 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                 }
             }
 
-            Button(
-                onClick = { viewModel.selected21plus3 = !viewModel.selected21plus3 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (viewModel.selected21plus3) Color.Green else Color.Red
-                ),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("Mise 21+3", color = Color.White)
-            }
-
-            Text(
-                if (viewModel.selected21plus3) "Mise 21+3 active" else "Mise 21+3 inactive",
-                color = Color.White
-            )
+//            Button(
+//                onClick = { viewModel.selected21plus3 = !viewModel.selected21plus3 },
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = if (viewModel.selected21plus3) Color.Green else Color.Red
+//                ),
+//                modifier = Modifier.align(Alignment.CenterHorizontally)
+//            ) {
+//                Text("Mise 21+3", color = Color.White)
+//            }
+//
+//            Text(
+//                if (viewModel.selected21plus3) "Mise 21+3 active" else "Mise 21+3 inactive",
+//                color = Color.White
+//            )
         }
     }}
 }
