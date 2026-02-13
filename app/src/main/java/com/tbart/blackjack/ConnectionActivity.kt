@@ -10,16 +10,16 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
-class RegisterActivity : AppCompatActivity() {
+class ConnectionActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
+
     private lateinit var emailField: EditText
     private lateinit var passwordField: EditText
-    private lateinit var signUpButton: Button
     private lateinit var signInButton: Button
+    private lateinit var signUpButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 3. Initialiser Firebase
         auth = Firebase.auth
         // VERIFICATION DE LA SESSION
         if (auth.currentUser != null) {
@@ -32,7 +32,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         // 2. Lier le code au fichier XML (vérifiez le nom de votre layout)
-        setContentView(R.layout.activity_register)
+        setContentView(R.layout.activity_connection)
 
         // 4. Faire le lien avec les éléments du design XML
         emailField = findViewById(R.id.emailEditText)
@@ -42,26 +42,28 @@ class RegisterActivity : AppCompatActivity() {
 
 
         // 5. Déclencher l'action au clic sur le bouton
-        signUpButton.setOnClickListener {
-            signUpUser()
+        signInButton.setOnClickListener {
+            signInUser()
         }
 
-        signInButton.setOnClickListener {
-            val intent = Intent(this, ConnectionActivity::class.java)
-            startActivity(intent)        }
+        signUpButton.setOnClickListener {
+            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
+        }
     }
 
-    private fun signUpUser() {
+    private fun signInUser(){
         val email = emailField.text.toString()
         val password = passwordField.text.toString()
 
-        if (email.isNotEmpty() && password.isNotEmpty()) {
-            auth.createUserWithEmailAndPassword(email, password)
+        if (email.isNotEmpty() && password.isNotEmpty()){
+            auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        // Succès : l'utilisateur est créé et connecté
+                        // Succès : l'utilisateur est connecté
                         val user = auth.currentUser
-                        Toast.makeText(baseContext, "Compte créé !", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(baseContext, "Connexion réussie !", Toast.LENGTH_SHORT)
+                            .show()
                         // Rediriger vers l'écran principal
                         val intent = Intent(this, MainActivity::class.java)
                         startActivity(intent)
