@@ -1,6 +1,9 @@
 package com.tbart.blackjack
 
+import android.content.Intent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -15,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +32,7 @@ fun ProfileScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val auth = Firebase.auth
+    val context = LocalContext.current
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -84,19 +89,33 @@ fun ProfileScreen(navController: NavController) {
                 }
             }
         ) { innerPadding ->
-            // On appelle votre interface actuelle ici
-            Text(
-                text = "Écran de Profil",
-                modifier = Modifier.padding(innerPadding).padding(16.dp),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
-                modifier = Modifier.padding(innerPadding).padding(16.dp),
-                fontSize = 18.sp
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Écran de Profil",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        auth.signOut()
+                        val intent = Intent(context, ConnectionActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text("Se déconnecter")
+                }
+            }
         }
     }
 }
