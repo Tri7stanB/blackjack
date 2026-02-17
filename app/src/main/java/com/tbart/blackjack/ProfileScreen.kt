@@ -1,7 +1,9 @@
 package com.tbart.blackjack
 
 import android.content.Intent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -39,9 +41,9 @@ fun ProfileScreen(navController: NavController) {
         drawerContent = {
             // C'est ici que vous dessinez le contenu de votre menu
             ModalDrawerSheet {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Jouer", fontSize = 20.sp) },
+                    label = { Text("Jouer", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -50,8 +52,9 @@ fun ProfileScreen(navController: NavController) {
                         }
                     }
                 )
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Historique", fontSize = 20.sp) },
+                    label = { Text("Historique", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -60,8 +63,9 @@ fun ProfileScreen(navController: NavController) {
                         }
                     }
                 )
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Profil", fontSize = 20.sp) },
+                    label = { Text("Profil", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -70,7 +74,6 @@ fun ProfileScreen(navController: NavController) {
                         }
                     }
                 )
-                // Ajoutez d'autres items ici...
             }
         }
     ) {
@@ -92,11 +95,13 @@ fun ProfileScreen(navController: NavController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(Color(0xFF0B6623))
                     .padding(innerPadding)
                     .padding(16.dp)
+                    .padding(bottom = 24.dp)
             ) {
                 Text(
-                    text = "Écran de Profil",
+                    text = "Profil",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -106,15 +111,18 @@ fun ProfileScreen(navController: NavController) {
                     fontSize = 18.sp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        auth.signOut()
-                        val intent = Intent(context, ConnectionActivity::class.java)
-                        context.startActivity(intent)
+                Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally),
+                        onClick = {
+                            auth.signOut()
+                            val intent = Intent(context, ConnectionActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text("Se déconnecter")
                     }
-                ) {
-                    Text("Se déconnecter")
-                }
+
             }
         }
     }

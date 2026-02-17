@@ -56,9 +56,9 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
         drawerContent = {
             // C'est ici que vous dessinez le contenu de votre menu
             ModalDrawerSheet {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Jouer", fontSize = 20.sp) },
+                    label = { Text("Jouer", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -67,8 +67,9 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
                         }
                     }
                 )
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Historique", fontSize = 20.sp) },
+                    label = { Text("Historique", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -77,8 +78,9 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
                         }
                     }
                 )
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Profil", fontSize = 20.sp) },
+                    label = { Text("Profil", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {

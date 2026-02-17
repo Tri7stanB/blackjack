@@ -1,5 +1,6 @@
 package com.tbart.blackjack
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,9 +35,9 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
         drawerContent = {
             // C'est ici que vous dessinez le contenu de votre menu
             ModalDrawerSheet {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Jouer", fontSize = 20.sp) },
+                    label = { Text("Jouer", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -45,8 +46,9 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
                         }
                     }
                 )
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Historique", fontSize = 20.sp) },
+                    label = { Text("Historique", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -55,8 +57,9 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
                         }
                     }
                 )
+                Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Profil", fontSize = 20.sp) },
+                    label = { Text("Profil", fontSize = 30.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -65,21 +68,38 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
                         }
                     }
                 )
-                // Ajoutez d'autres items ici...
             }
         }
     ) {
+            // Le contenu principal de votre jeu
+            Scaffold(
+                topBar = {
+                    // Optionnel : Une petite barre pour ouvrir le menu
+                    Button(
+                        onClick = { scope.launch { drawerState.open() }},
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        )
+
+                    ) {
+                        Text("≡", color = Color.Black, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            ) { innerPadding ->
+
+
         val history = viewModel.getDailyHistory()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFF0B6623))
+                .padding(innerPadding)
                 .padding(16.dp)
         ) {
             // En-tête
             Text(
-                "📊 Historique des gains",
+                "Historique des gains",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -94,7 +114,7 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
             ) {
-                Text("🔄 Rafraîchir")
+                Text("Rafraîchir")
             }
 
             // Liste des records
@@ -122,7 +142,7 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
                         DailyRecordItem(record)
                     }
                 }
-            }
+            }}
         }
 }}
 
