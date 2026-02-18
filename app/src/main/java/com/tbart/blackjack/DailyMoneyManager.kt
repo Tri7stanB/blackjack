@@ -2,10 +2,16 @@ package com.tbart.blackjack
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
 
 data class DailyRecord(
@@ -19,6 +25,12 @@ class DailyMoneyManager(context: Context) {
 
     private val gson = Gson()
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    @RequiresApi(Build.VERSION_CODES.O)
+    val today = LocalDate.now().toString()
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+    private val firestore = FirebaseFirestore.getInstance()
+
 
     companion object {
         private const val KEY_CURRENT_MONEY = "current_money"
@@ -29,6 +41,7 @@ class DailyMoneyManager(context: Context) {
     }
 
     // Récupère l'argent actuel
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getCurrentMoney(): Int {
         Log.d(TAG, "📞 getCurrentMoney() appelé")
         checkAndResetIfNewDay()
@@ -41,9 +54,24 @@ class DailyMoneyManager(context: Context) {
     fun saveCurrentMoney(amount: Int) {
         Log.d(TAG, "💾 Sauvegarde argent: $amount")
         prefs.edit().putInt(KEY_CURRENT_MONEY, amount).apply()
+
+        // Sauvegarde Firestore
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            firestore.collection("users")
+                .document(userId)
+                .set(
+                    mapOf("currentMoney" to amount),
+                    com.google.firebase.firestore.SetOptions.merge()
+                )
+
+            Log.d(TAG, "☁️ Argent courant synchronisé sur Firestore")
+        }
     }
 
+
     // Vérifie si on est un nouveau jour et reset si nécessaire
+    @RequiresApi(Build.VERSION_CODES.O)
     fun checkAndResetIfNewDay() {
         val today = dateFormat.format(Date())
         val lastResetDate = prefs.getString(KEY_LAST_RESET_DATE, "")
@@ -75,6 +103,7 @@ class DailyMoneyManager(context: Context) {
     }
 
     // Sauvegarde un record quotidien
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun saveDailyRecord(date: String, earnings: Int) {
         val history = getDailyHistory().toMutableList()
 
@@ -87,6 +116,26 @@ class DailyMoneyManager(context: Context) {
         val json = gson.toJson(history)
 
         prefs.edit().putString(KEY_DAILY_HISTORY, json).apply()
+
+        // Sauvegarde Firestore
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val dailyData = hashMapOf(
+                "money" to earnings,
+                "timestamp" to FieldValue.serverTimestamp()
+            )
+
+            firestore.collection("users")
+                .document(userId)
+                .collection("dailyGains")
+                .document(date)
+                .set(dailyData)
+
+            Log.d(TAG, "DailyRecord sauvegardé sur Firestore")
+        } else {
+            Log.d(TAG, "Utilisateur non connecté, Firestore ignoré")
+        }
+
     }
 
     // Récupère l'historique quotidien
@@ -117,4 +166,23 @@ class DailyMoneyManager(context: Context) {
             .apply()
         Log.d(TAG, "✅ Reset forcé effectué")
     }
+
+    fun syncFromFirestore(onComplete: (() -> Unit)? = null) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        firestore.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val money = document.getLong("currentMoney")?.toInt()
+                    if (money != null) {
+                        prefs.edit().putInt(KEY_CURRENT_MONEY, money).apply()
+                    }
+                }
+                onComplete?.invoke()
+            }
+    }
+
+
 }

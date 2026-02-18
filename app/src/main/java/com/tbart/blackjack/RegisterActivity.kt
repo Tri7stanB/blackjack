@@ -16,19 +16,26 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var passwordField: EditText
     private lateinit var signUpButton: Button
     private lateinit var signInButton: Button
+    private lateinit var dailyMoneyManager: DailyMoneyManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 3. Initialiser Firebase
         auth = Firebase.auth
+        dailyMoneyManager = DailyMoneyManager(this)
+
         // VERIFICATION DE LA SESSION
-        if (auth.currentUser != null) {
-            // L'utilisateur est déjà connecté !
-            // On le redirige immédiatement vers le jeu sans afficher l'inscription
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish() // Très important pour qu'il ne puisse pas revenir en arrière
-            return // On arrête l'exécution de onCreate ici
+        if (auth.currentUser != null) { //user deja connecté
+            if (auth.currentUser != null) {
+
+                dailyMoneyManager.syncFromFirestore() // 🔥 SYNC ICI
+
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+                return
+            }
+
         }
 
         // 2. Lier le code au fichier XML (vérifiez le nom de votre layout)
@@ -59,13 +66,11 @@ class RegisterActivity : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        // Succès : l'utilisateur est créé et connecté
-                        val user = auth.currentUser
-                        Toast.makeText(baseContext, "Compte créé !", Toast.LENGTH_SHORT).show()
-                        // Rediriger vers l'écran principal
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
-                        finish()
+                        dailyMoneyManager.syncFromFirestore {
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
                     } else {
                         // Échec : afficher le message d'erreur
                         Toast.makeText(baseContext, "Erreur : ${task.exception?.message}",
