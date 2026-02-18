@@ -20,14 +20,15 @@ data class DailyRecord(
 )
 
 class DailyMoneyManager(context: Context) {
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+
     private val prefs: SharedPreferences =
-        context.getSharedPreferences("blackjack_prefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("blackjack_prefs_${uid ?: "guest"}", Context.MODE_PRIVATE)
 
     private val gson = Gson()
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     @RequiresApi(Build.VERSION_CODES.O)
     val today = LocalDate.now().toString()
-    val uid = FirebaseAuth.getInstance().currentUser?.uid
 
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -168,8 +169,14 @@ class DailyMoneyManager(context: Context) {
     }
 
     fun syncFromFirestore(onComplete: (() -> Unit)? = null) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+            onComplete?.invoke()
+            return
+        }
 
+        Log.d(TAG, "☁️ Début sync Firestore pour user $userId")
+
+        // 1. Sync currentMoney
         firestore.collection("users")
             .document(userId)
             .get()
@@ -178,11 +185,95 @@ class DailyMoneyManager(context: Context) {
                     val money = document.getLong("currentMoney")?.toInt()
                     if (money != null) {
                         prefs.edit().putInt(KEY_CURRENT_MONEY, money).apply()
+                        Log.d(TAG, "☁️ currentMoney synced: $money")
                     }
                 }
+
+                // 2. Sync dailyGains history (bidirectional)
+                syncDailyHistory(userId, onComplete)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "❌ Erreur sync currentMoney: ${e.message}")
+                // En cas d'erreur réseau, on continue avec les données locales
                 onComplete?.invoke()
             }
     }
 
+    private fun syncDailyHistory(userId: String, onComplete: (() -> Unit)? = null) {
+        firestore.collection("users")
+            .document(userId)
+            .collection("dailyGains")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                // Récupérer l'historique distant depuis Firestore
+                val remoteRecords = mutableMapOf<String, Int>()
+                for (doc in querySnapshot.documents) {
+                    val date = doc.id
+                    val money = doc.getLong("money")?.toInt()
+                    if (money != null) {
+                        remoteRecords[date] = money
+                    }
+                }
+                Log.d(TAG, "☁️ ${remoteRecords.size} records récupérés depuis Firestore")
+
+                // Récupérer l'historique local
+                val localHistory = getDailyHistory()
+                val localRecords = mutableMapOf<String, Int>()
+                for (record in localHistory) {
+                    localRecords[record.date] = record.money
+                }
+                Log.d(TAG, "📱 ${localRecords.size} records locaux")
+
+                // Fusionner : Firestore gagne sur les conflits de date
+                val mergedRecords = mutableMapOf<String, Int>()
+                mergedRecords.putAll(localRecords)
+                mergedRecords.putAll(remoteRecords) // Firestore écrase les doublons
+
+                // Convertir en liste triée (plus récent en premier), limiter à 30
+                val mergedHistory = mergedRecords
+                    .map { (date, money) -> DailyRecord(date, money) }
+                    .sortedByDescending { it.date }
+                    .take(30)
+
+                // Sauvegarder localement
+                val json = gson.toJson(mergedHistory)
+                prefs.edit().putString(KEY_DAILY_HISTORY, json).apply()
+                Log.d(TAG, "✅ Historique fusionné: ${mergedHistory.size} records sauvegardés localement")
+
+                // Pousser les records locaux manquants vers Firestore
+                val localOnlyRecords = localRecords.filter { it.key !in remoteRecords }
+                if (localOnlyRecords.isNotEmpty()) {
+                    pushLocalHistoryToFirestore(userId, localOnlyRecords)
+                }
+
+                onComplete?.invoke()
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "❌ Erreur sync dailyGains: ${e.message}")
+                // En cas d'erreur réseau, on garde les données locales
+                onComplete?.invoke()
+            }
+    }
+
+    private fun pushLocalHistoryToFirestore(userId: String, records: Map<String, Int>) {
+        Log.d(TAG, "☁️ Push de ${records.size} records locaux vers Firestore")
+        for ((date, money) in records) {
+            val dailyData = hashMapOf(
+                "money" to money,
+                "timestamp" to FieldValue.serverTimestamp()
+            )
+            firestore.collection("users")
+                .document(userId)
+                .collection("dailyGains")
+                .document(date)
+                .set(dailyData)
+                .addOnSuccessListener {
+                    Log.d(TAG, "☁️ Record $date pushé vers Firestore")
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "❌ Erreur push record $date: ${e.message}")
+                }
+        }
+    }
 
 }

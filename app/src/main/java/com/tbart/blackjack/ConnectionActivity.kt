@@ -3,6 +3,7 @@ package com.tbart.blackjack
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ConnectionActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -24,12 +26,13 @@ class ConnectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
-        dailyMoneyManager = DailyMoneyManager(this)
 
         // 1. Vérifier si l'utilisateur est déjà connecté
         // VERIFICATION DE LA SESSION
         if (auth.currentUser != null) {
             // L'utilisateur est déjà connecté !
+            // On crée le manager APRÈS auth pour avoir le bon UID
+            dailyMoneyManager = DailyMoneyManager(this)
             // On synchronise puis on redirige vers le menu
             dailyMoneyManager.syncFromFirestore {
                 val intent = Intent(this, MainActivity::class.java)
@@ -68,6 +71,8 @@ class ConnectionActivity : AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
+                        // On crée le manager APRÈS login réussi pour avoir le bon UID
+                        dailyMoneyManager = DailyMoneyManager(this)
                         dailyMoneyManager.syncFromFirestore {
                             val intent = Intent(this, MainActivity::class.java)
                             startActivity(intent)
