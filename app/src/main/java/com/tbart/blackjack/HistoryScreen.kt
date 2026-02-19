@@ -59,6 +59,17 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
+                    label = { Text("Amis", fontSize = 30.sp) },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close() // 1. On ferme le menu
+                            navController.navigate(Screen.ProfileScreen.route) // 2. ON NAVIGUE !
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                NavigationDrawerItem(
                     label = { Text("Profil", fontSize = 30.sp) },
                     selected = false,
                     onClick = {

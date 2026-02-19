@@ -17,7 +17,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +40,17 @@ fun ProfileScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val auth = Firebase.auth
     val context = LocalContext.current
+    val userManager = UserManager()
+
+    // État pour le code ami (chargé de manière asynchrone)
+    var friendCode by remember { mutableStateOf<String?>(null) }
+
+    // Charger le code ami au lancement de l'écran
+    LaunchedEffect(Unit) {
+        userManager.getPlayerId { id ->
+            friendCode = id
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -60,6 +76,17 @@ fun ProfileScreen(navController: NavController) {
                         scope.launch {
                             drawerState.close()
                             navController.navigate(Screen.HistoryScreen.route)
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                NavigationDrawerItem(
+                    label = { Text("Amis", fontSize = 30.sp) },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close() // 1. On ferme le menu
+                            navController.navigate(Screen.ProfileScreen.route) // 2. ON NAVIGUE !
                         }
                     }
                 )
@@ -108,6 +135,12 @@ fun ProfileScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
+                    fontSize = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Code ami : ${friendCode ?: "Chargement..."}",
                     fontSize = 18.sp
                 )
                 Spacer(modifier = Modifier.height(16.dp))

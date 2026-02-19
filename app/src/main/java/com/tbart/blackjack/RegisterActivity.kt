@@ -2,6 +2,7 @@ package com.tbart.blackjack
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -17,12 +18,16 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var signUpButton: Button
     private lateinit var signInButton: Button
     private lateinit var dailyMoneyManager: DailyMoneyManager
+    private lateinit var userManager : UserManager
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 3. Initialiser Firebase
         auth = Firebase.auth
         dailyMoneyManager = DailyMoneyManager(this)
+        userManager = UserManager()
+
 
         // VERIFICATION DE LA SESSION
         if (auth.currentUser != null) { //user deja connecté
@@ -66,6 +71,14 @@ class RegisterActivity : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
+                        // Créer le DailyMoneyManager après inscription (UID disponible)
+                        dailyMoneyManager = DailyMoneyManager(this)
+
+                        // Générer le code ami APRÈS inscription réussie
+                        userManager.createUniquePlayerId { id ->
+                            Log.d("PLAYER_ID", "ID généré : $id")
+                        }
+
                         dailyMoneyManager.syncFromFirestore {
                             val intent = Intent(this, MainActivity::class.java)
                             startActivity(intent)
@@ -78,5 +91,6 @@ class RegisterActivity : AppCompatActivity() {
                     }
                 }
         }
+
     }
 }
