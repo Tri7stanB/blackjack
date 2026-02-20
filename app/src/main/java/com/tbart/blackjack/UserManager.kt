@@ -51,6 +51,16 @@ class UserManager {
                                 com.google.firebase.firestore.SetOptions.merge()
                             )
 
+                        // Écrire aussi dans le profil public
+                        firestore.collection("users")
+                            .document(uid)
+                            .collection("public")
+                            .document("profile")
+                            .set(
+                                mapOf("playerId" to newId),
+                                com.google.firebase.firestore.SetOptions.merge()
+                            )
+
                         onComplete(newId)
                     } else {
                         // ID déjà pris → on réessaie
@@ -67,6 +77,15 @@ class UserManager {
         return (1..6)
             .map { chars.random() }
             .joinToString("")
+    }
+    // Met à jour le profil public (lisible par les autres utilisateurs)
+    fun updatePublicProfile(data: Map<String, Any>) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        firestore.collection("users")
+            .document(uid)
+            .collection("public")
+            .document("profile")
+            .set(data, com.google.firebase.firestore.SetOptions.merge())
     }
 
 }

@@ -77,6 +77,8 @@ class RegisterActivity : AppCompatActivity() {
                         // Générer le code ami APRÈS inscription réussie
                         userManager.createUniquePlayerId { id ->
                             Log.d("PLAYER_ID", "ID généré : $id")
+                            // Écrire aussi le username dans le profil public
+                            userManager.updatePublicProfile(mapOf("username" to email))
                         }
 
                         dailyMoneyManager.syncFromFirestore {

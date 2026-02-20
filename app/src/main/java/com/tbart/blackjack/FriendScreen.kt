@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -60,6 +62,8 @@ fun FriendScreen(navController: NavController) {
     val auth = Firebase.auth
     val context = LocalContext.current
     val userManager = UserManager()
+    val friendManager = FriendManager()
+
 
     // État pour le code ami (chargé de manière asynchrone)
     var friendCode by remember { mutableStateOf<String?>(null) }
@@ -69,6 +73,15 @@ fun FriendScreen(navController: NavController) {
         userManager.getPlayerId { id ->
             friendCode = id
         }
+    }
+
+    var friends by remember { mutableStateOf(listOf<FriendItem>()) }
+
+    LaunchedEffect(Unit) {
+        friendManager.getFriends { amis ->
+            friends = amis
+        }
+
     }
 
     ModalNavigationDrawer(
@@ -189,29 +202,40 @@ fun FriendScreen(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
-                    fontSize = 18.sp
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Code ami : ${friendCode ?: "Chargement..."}",
-                    fontSize = 18.sp
+                    text = "Vos amis",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Spacer(modifier = Modifier.weight(1f))
-                Button(
-                    modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally),
-                    onClick = {
-                        auth.signOut()
-                        val intent = Intent(context, ConnectionActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                ) {
-                    Text("Se déconnecter")
+                friends.forEach { friend ->
+                    FriendCard(friend)
                 }
-
+                Spacer(modifier = Modifier.weight(1f))
             }
+        }
+    }
+}
+
+@Composable
+fun FriendCard(friend : FriendItem){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = Color(0xFF0B6623),
+            contentColor = Color.White
+        ),
+        border = BorderStroke(1.dp, Color.White)
+    ){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(friend.username)
+            Spacer(modifier = Modifier.width(80.dp))
+            Text(friend.playerId)
         }
     }
 }
