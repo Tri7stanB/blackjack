@@ -25,5 +25,9 @@ fun Navigation() {
         composable(route = Screen.HistoryScreen.route){
             HistoryScreen(navController, sharedViewModel)
         }
+        composable(route = Screen.FriendScreen.route){
+            FriendScreen(navController)
+        }
+
     }
 }

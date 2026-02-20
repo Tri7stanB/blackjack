@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.tbart.blackjack"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.tbart.blackjack"
@@ -63,6 +63,7 @@ dependencies {
     implementation("com.google.guava:guava:33.0.0-android")
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -85,7 +85,7 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
                     onClick = {
                         scope.launch {
                             drawerState.close() // 1. On ferme le menu
-                            navController.navigate(Screen.ProfileScreen.route) // 2. ON NAVIGUE !
+                            navController.navigate(Screen.FriendScreen.route) // 2. ON NAVIGUE !
                         }
                     }
                 )

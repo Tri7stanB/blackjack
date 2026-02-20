@@ -1,18 +1,32 @@
 package com.tbart.blackjack
 
+import android.R
 import android.content.Intent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
+
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -26,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,9 +48,13 @@ import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
+import java.util.Locale
+import java.util.Locale.getDefault
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun FriendScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val auth = Firebase.auth
@@ -127,11 +146,47 @@ fun ProfileScreen(navController: NavController) {
                     .padding(16.dp)
                     .padding(bottom = 24.dp)
             ) {
-                Text(
-                    text = "Profil",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.Bottom
+                ){
+                    var friendInput by remember { mutableStateOf("") }
+                    OutlinedTextField(
+                        value = friendInput.uppercase(getDefault()),
+                        onValueChange = { friendInput = it },
+                        label = { Text("Ajouter un ami")},
+                        textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.White,
+                            unfocusedLabelColor = Color.White,
+                            focusedLabelColor = Color.White,
+                            cursorColor = Color.White)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+
+                        },
+                        modifier = Modifier.size(56.dp),
+                        shape = androidx.compose.foundation.shape.CircleShape,
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            contentColor = Color.White,
+                            containerColor = Color(0xFF0B6623)
+                        ),
+                        border = BorderStroke(1.dp, Color.White),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Rechercher un ami",
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
@@ -145,16 +200,16 @@ fun ProfileScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Spacer(modifier = Modifier.weight(1f))
-                    Button(
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally),
-                        onClick = {
-                            auth.signOut()
-                            val intent = Intent(context, ConnectionActivity::class.java)
-                            context.startActivity(intent)
-                        }
-                    ) {
-                        Text("Se déconnecter")
+                Button(
+                    modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally),
+                    onClick = {
+                        auth.signOut()
+                        val intent = Intent(context, ConnectionActivity::class.java)
+                        context.startActivity(intent)
                     }
+                ) {
+                    Text("Se déconnecter")
+                }
 
             }
         }
