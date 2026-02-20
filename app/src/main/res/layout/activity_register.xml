@@ -11,13 +11,24 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:text="Créer un compte Blackjack"
+        android:textColor="#FF0B6623"
         android:textSize="24sp" />
+
+    <EditText
+        android:id="@+id/usernameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nom d'utilisateur"
+        android:textColor="#FF0B6623"
+        android:inputType="textEmailAddress" />
 
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:hint="Email"
+        android:textColor="#FF0B6623"
         android:inputType="textEmailAddress" />
 
     <EditText
@@ -26,6 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Mot de passe (6 car. min)"
+        android:textColor="#FF0B6623"
         android:inputType="textPassword" />
 
     <Button
@@ -33,6 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:backgroundTint="#FF0B6623"
         android:text="S'inscrire" />
 
     <Button

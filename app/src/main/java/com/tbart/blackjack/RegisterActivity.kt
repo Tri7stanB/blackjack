@@ -15,6 +15,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var emailField: EditText
     private lateinit var passwordField: EditText
+    private lateinit var usernameField: EditText
     private lateinit var signUpButton: Button
     private lateinit var signInButton: Button
     private lateinit var dailyMoneyManager: DailyMoneyManager
@@ -49,6 +50,7 @@ class RegisterActivity : AppCompatActivity() {
         // 4. Faire le lien avec les éléments du design XML
         emailField = findViewById(R.id.emailEditText)
         passwordField = findViewById(R.id.passwordEditText)
+        usernameField = findViewById(R.id.usernameEditText)
         signUpButton = findViewById(R.id.registerButton)
         signInButton = findViewById(R.id.signInButton)
 
@@ -66,8 +68,9 @@ class RegisterActivity : AppCompatActivity() {
     private fun signUpUser() {
         val email = emailField.text.toString()
         val password = passwordField.text.toString()
+        val username = usernameField.text.toString()
 
-        if (email.isNotEmpty() && password.isNotEmpty()) {
+        if (email.isNotEmpty() && password.isNotEmpty() && username.isNotEmpty()) {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
@@ -78,7 +81,7 @@ class RegisterActivity : AppCompatActivity() {
                         userManager.createUniquePlayerId { id ->
                             Log.d("PLAYER_ID", "ID généré : $id")
                             // Écrire aussi le username dans le profil public
-                            userManager.updatePublicProfile(mapOf("username" to email))
+                            userManager.updatePublicProfile(mapOf("username" to username))
                         }
 
                         dailyMoneyManager.syncFromFirestore {
@@ -93,6 +96,7 @@ class RegisterActivity : AppCompatActivity() {
                     }
                 }
         }
+
 
     }
 }
