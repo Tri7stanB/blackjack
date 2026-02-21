@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Send
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -209,7 +211,7 @@ fun FriendScreen(navController: NavController) {
                 searchedFriend?.let { friend ->
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Résultat :", fontWeight = FontWeight.Bold)
-                    FriendCard(friend)
+                    FriendCard(friend, true)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -228,7 +230,7 @@ fun FriendScreen(navController: NavController) {
 }
 
 @Composable
-fun FriendCard(friend : FriendItem){
+fun FriendCard(friend : FriendItem, friendButton : Boolean = false){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,11 +244,58 @@ fun FriendCard(friend : FriendItem){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            Text(friend.username)
-            Spacer(modifier = Modifier.width(80.dp))
             Text(friend.playerId)
+            Spacer(modifier = Modifier.width(20.dp))
+            Text(friend.username)
+            Spacer(modifier = Modifier.weight(1f))
+            if (friendButton){
+                Button(
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color(0xFF0B6623)),
+                    border = BorderStroke(1.dp, Color.White),
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Ajouter un ami",
+                    )
+                }
+            }
+            else {
+                Button(
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color(0xFF0B6623)),
+                    border = BorderStroke(1.dp, Color.White),
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = "Envoyer de l'argenti",
+                    )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Button(
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color(0xFF0B6623)),
+                    border = BorderStroke(1.dp, Color.White),
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Supprimer un ami",
+                    )
+                }
+
+            }
         }
     }
 }
