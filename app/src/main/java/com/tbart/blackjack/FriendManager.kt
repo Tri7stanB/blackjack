@@ -1,5 +1,6 @@
 package com.tbart.blackjack
 
+import androidx.compose.runtime.Composable
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
@@ -58,6 +59,58 @@ class FriendManager {
             }
             .addOnFailureListener {
                 callback(emptyList())
+            }
+    }
+
+    fun searchFriend(playerId: String, callback: (FriendItem?) -> Unit) {
+
+        val db = Firebase.firestore
+
+        // 1️⃣ Chercher dans playerIds
+        db.collection("playerIds")
+            .document(playerId)
+            .get()
+            .addOnSuccessListener { playerDoc ->
+
+                if (!playerDoc.exists()) {
+                    callback(null)
+                    return@addOnSuccessListener
+                }
+
+                val uid = playerDoc.getString("uid")
+                if (uid == null) {
+                    callback(null)
+                    return@addOnSuccessListener
+                }
+
+                // 2️⃣ Aller chercher son profil public
+                db.collection("users")
+                    .document(uid)
+                    .collection("public")
+                    .document("profile")
+                    .get()
+                    .addOnSuccessListener { profileDoc ->
+
+                        if (!profileDoc.exists()) {
+                            callback(null)
+                            return@addOnSuccessListener
+                        }
+
+                        val username = profileDoc.getString("username") ?: "Inconnu"
+
+                        val friend = FriendItem(
+                            playerId = playerId,
+                            username = username
+                        )
+
+                        callback(friend)
+                    }
+                    .addOnFailureListener {
+                        callback(null)
+                    }
+            }
+            .addOnFailureListener {
+                callback(null)
             }
     }
 }

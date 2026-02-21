@@ -67,6 +67,7 @@ fun FriendScreen(navController: NavController) {
 
     // État pour le code ami (chargé de manière asynchrone)
     var friendCode by remember { mutableStateOf<String?>(null) }
+    var searchedFriend by remember { mutableStateOf<FriendItem?>(null) }
 
     // Charger le code ami au lancement de l'écran
     LaunchedEffect(Unit) {
@@ -183,7 +184,12 @@ fun FriendScreen(navController: NavController) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
+                            friendManager.searchFriend(friendInput.uppercase()) { friend ->
+                                if (friend != null) {
+                                    searchedFriend = friend
+                                }
 
+                            }
                         },
                         modifier = Modifier.size(56.dp),
                         shape = androidx.compose.foundation.shape.CircleShape,
@@ -199,6 +205,11 @@ fun FriendScreen(navController: NavController) {
                             contentDescription = "Rechercher un ami",
                         )
                     }
+                }
+                searchedFriend?.let { friend ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Résultat :", fontWeight = FontWeight.Bold)
+                    FriendCard(friend)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
