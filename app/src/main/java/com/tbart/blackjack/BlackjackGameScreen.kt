@@ -156,7 +156,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                     .padding(8.dp)
             )
             {
-                Text("Argent : ${game.player.money}", color = Color.Yellow, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                Text("Argent : ${game.player.money}", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
 
         }
         }
@@ -170,9 +170,9 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 
             // 🎰 MODE : En attente de mise
             Text(
-                "💰 Placez votre mise pour commencer",
+                "Placez votre mise pour commencer",
                 fontSize = 20.sp,
-                color = Color.Yellow,
+                color = Color.White,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
@@ -210,8 +210,8 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 
         } else {
         // --- Zone Croupier ---
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("🤵 Croupier", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Column() {
+            Text("Croupier", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Row {
                 game.getDealerCards().forEach { card ->
                     CardImage(rank = card.rank.toString(), suit = card.suit.toString())
@@ -223,8 +223,8 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
         Spacer(modifier = Modifier.height(20.dp))
 
         // --- Zone Joueur ---
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("🧑 Joueur", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Column() {
+            Text("Joueur", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Row (    modifier = Modifier.padding(start = 16.dp)
             ){
                 game.getPlayerCards().forEach { card ->
@@ -247,14 +247,14 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                         viewModel.message = if (viewModel.winner == 1) {
                             game.handleWin(2)
                             viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "🎉 Gagné !"
+                            "Gagné !"
                         } else if (viewModel.winner == 2) {
                             viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "💀 Perdu !"
+                            "Perdu !"
                         } else {
                             game.handleDraw()
                             viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "🤝 Égalité !"
+                            "Égalité !"
                         }
                     }
                 },
@@ -273,14 +273,14 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                         viewModel.message = if (viewModel.winner == 1) {
                             game.handleWin(2)
                             viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "🎉 Gagné !"
+                            "Gagné !"
                         } else if (viewModel.winner == 2) {
                             viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "💀 Perdu !"
+                            "Perdu !"
                         } else {
                             game.handleDraw()
                             viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "🤝 Égalité !"
+                            "Égalité !"
                         }
                     }
                 },

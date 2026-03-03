@@ -1,6 +1,7 @@
 package com.tbart.blackjack
 
 import android.content.Intent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -130,18 +131,22 @@ fun ProfileScreen(navController: NavController) {
                 Text(
                     text = "Profil",
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
+                    color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Code ami : ${friendCode ?: "Chargement..."}",
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
+                    color = Color.White
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Spacer(modifier = Modifier.weight(1f))
@@ -151,9 +156,16 @@ fun ProfileScreen(navController: NavController) {
                             auth.signOut()
                             val intent = Intent(context, ConnectionActivity::class.java)
                             context.startActivity(intent)
-                        }
+                        },
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            contentColor = Color.White,
+                            containerColor = Color(0xFF0B6623)),
+                border = BorderStroke(1.dp, Color.White),
                     ) {
-                        Text("Se déconnecter")
+                        Text(
+                            "Se déconnecter",
+                            color = Color.White
+                        )
                     }
 
             }

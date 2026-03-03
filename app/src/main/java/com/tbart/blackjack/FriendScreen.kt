@@ -217,7 +217,8 @@ fun FriendScreen(navController: NavController) {
                 Text(
                     text = "Vos amis",
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 friends.forEach { friend ->
@@ -277,7 +278,7 @@ fun FriendCard(friend : FriendItem, friendButton : Boolean = false){
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Send,
-                        contentDescription = "Envoyer de l'argenti",
+                        contentDescription = "Envoyer de l'argent",
                     )
                 }
                 Spacer(modifier = Modifier.width(6.dp))
