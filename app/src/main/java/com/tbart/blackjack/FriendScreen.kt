@@ -171,7 +171,7 @@ fun FriendScreen(navController: NavController) {
                     var friendInput by remember { mutableStateOf("") }
                     OutlinedTextField(
                         value = friendInput.uppercase(getDefault()),
-                        onValueChange = { friendInput = it },
+                        onValueChange = { if (it.length <= 6) friendInput = it },
                         label = { Text("Ajouter un ami")},
                         textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp),
                         singleLine = true,
@@ -181,7 +181,7 @@ fun FriendScreen(navController: NavController) {
                             unfocusedBorderColor = Color.White,
                             unfocusedLabelColor = Color.White,
                             focusedLabelColor = Color.White,
-                            cursorColor = Color.White)
+                            cursorColor = Color.White),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
