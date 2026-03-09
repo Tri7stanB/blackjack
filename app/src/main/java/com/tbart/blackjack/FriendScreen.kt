@@ -231,7 +231,7 @@ fun FriendScreen(navController: NavController) {
 }
 
 @Composable
-fun FriendCard(friend : FriendItem, friendButton : Boolean = false){
+fun FriendCard(friend : FriendItem, friendButton : Boolean = false, friendManager: FriendManager = FriendManager()){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -259,7 +259,9 @@ fun FriendCard(friend : FriendItem, friendButton : Boolean = false){
                         contentColor = Color.White,
                         containerColor = Color(0xFF0B6623)),
                     border = BorderStroke(1.dp, Color.White),
-                    onClick = {}
+                    onClick = {
+                        friendManager.addFriend(friend)
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,

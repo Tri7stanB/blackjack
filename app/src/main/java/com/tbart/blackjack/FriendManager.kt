@@ -1,8 +1,10 @@
 package com.tbart.blackjack
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 
 data class FriendItem(
@@ -111,6 +113,32 @@ class FriendManager {
             }
             .addOnFailureListener {
                 callback(null)
+            }
+    }
+
+    fun addFriend(friend: FriendItem) {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+        val friendId = friend.playerId
+
+        Firebase.firestore.collection("playerIds")
+            .document(friendId)
+            .get()
+            .addOnSuccessListener { friendDoc ->
+                val friendUid = friendDoc.getString("uid") ?: return@addOnSuccessListener
+
+                // ✅ Ici on est sûr que friendUid est disponible
+                Firebase.firestore.collection("users")
+                    .document(userId)
+                    .update("friends", FieldValue.arrayUnion(friendUid))
+                    .addOnSuccessListener {
+                        Log.d("Firestore", "Ami ajouté avec succès")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Firestore", "Erreur lors de l'ajout", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Joueur introuvable", e)
             }
     }
 }
