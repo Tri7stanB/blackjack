@@ -27,6 +27,26 @@ class UserManager {
             }
     }
 
+    fun getUsername(onResult: (String?) -> Unit) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            onResult("")
+            return
+        }
+            firestore.collection("users")
+                .document(uid)
+                .collection("public")
+                .document("profile")
+                .get()
+                .addOnSuccessListener { document ->
+                    val id: String? = document.getString("username")
+                    onResult(id)
+                }
+                .addOnFailureListener {
+                    onResult(null)
+                }
+        }
+
     fun createUniquePlayerId(onComplete: (String?) -> Unit) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 

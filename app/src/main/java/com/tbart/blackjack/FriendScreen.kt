@@ -4,6 +4,7 @@ import android.R
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
@@ -176,12 +178,20 @@ fun FriendScreen(navController: NavController) {
                         textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp),
                         singleLine = true,
                         modifier = Modifier.weight(1f),
-                        colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
+                        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color.White,
                             unfocusedBorderColor = Color.White,
                             unfocusedLabelColor = Color.White,
                             focusedLabelColor = Color.White,
                             cursorColor = Color.White),
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Clear,
+                                contentDescription = "Supprimer la saisie",
+                                modifier = Modifier.clickable { friendInput = "" },
+                                tint = Color.White
+                            )
+                        }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
@@ -210,7 +220,9 @@ fun FriendScreen(navController: NavController) {
                 }
                 searchedFriend?.let { friend ->
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Résultat :", fontWeight = FontWeight.Bold)
+                    Text("Résultat", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 24.sp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     FriendCard(friend, true)
                 }
                 Spacer(modifier = Modifier.height(16.dp))

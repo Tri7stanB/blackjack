@@ -117,17 +117,6 @@ fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewMode
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // 🧪 BOUTON DE DEBUG TEMPORAIRE
-            Button(
-                onClick = {
-                    viewModel.checkForNewDay()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-            ) {
-                Text("Rafraîchir")
-            }
-
             // Liste des records
             if (history.isEmpty()) {
                 Box(
@@ -181,8 +170,8 @@ fun DailyRecordItem(record: DailyRecord) {
             )
 
             Text(
-                text = if (record.money >= 0) "+${record.money}$" else "${record.money}$",
-                color = if (record.money >= 0) Color.Green else Color.Red,
+                text = if (record.money >= 1000) "+${record.money-1000}$" else "${record.money-1000}$",
+                color = if (record.money >= 1000) Color.Green else Color.Red,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
