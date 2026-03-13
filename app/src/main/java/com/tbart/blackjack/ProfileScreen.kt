@@ -169,7 +169,7 @@ fun ProfileScreen(navController: NavController) {
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.padding(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
@@ -318,14 +318,13 @@ fun ProfileScreen(navController: NavController) {
                         fontSize = 18.sp,
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
                     Text(
                         text = "Code ami : ${friendCode ?: "Chargement..."}",
                         fontSize = 18.sp,
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(48.dp))
                     Button(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                         onClick = {
