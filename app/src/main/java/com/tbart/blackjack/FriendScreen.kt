@@ -196,11 +196,14 @@ fun FriendScreen(navController: NavController) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
+                            if (friendInput.length != 6) return@Button
                             friendManager.searchFriend(friendInput.uppercase()) { friend ->
                                 if (friend != null) {
                                     searchedFriend = friend
                                 }
-
+                                else {
+                                    searchedFriend = null
+                                }
                             }
                         },
                         modifier = Modifier.size(56.dp),
