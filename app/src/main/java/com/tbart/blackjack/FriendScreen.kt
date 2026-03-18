@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,10 +64,11 @@ import java.util.Locale.getDefault
 fun FriendScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val auth = Firebase.auth
-    val context = LocalContext.current
-    val userManager = UserManager()
-    val friendManager = FriendManager()
+
+    val userManager = remember { UserManager() }
+    val friendManager = remember { FriendManager() }
+
+    val friends by friendManager.friends.collectAsState()
 
 
     // État pour le code ami (chargé de manière asynchrone)
@@ -80,14 +82,6 @@ fun FriendScreen(navController: NavController) {
         }
     }
 
-    var friends by remember { mutableStateOf(listOf<FriendItem>()) }
-
-    LaunchedEffect(Unit) {
-        friendManager.getFriends { amis ->
-            friends = amis
-        }
-
-    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -311,7 +305,9 @@ fun FriendCard(friend : FriendItem, friendButton : Boolean = false, himself : Bo
                             contentColor = Color.White,
                             containerColor = Color(0xFF0B6623)),
                         border = BorderStroke(1.dp, Color.White),
-                        onClick = {}
+                        onClick = {
+                            friendManager.deleteFriend(friend)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Delete,

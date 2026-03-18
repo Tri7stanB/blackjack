@@ -6,6 +6,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class FriendItem(
     val playerId: String,
@@ -13,6 +16,59 @@ data class FriendItem(
 )
 
 class FriendManager {
+
+    private val _friends = MutableStateFlow<List<FriendItem>>(emptyList())
+    val friends: StateFlow<List<FriendItem>> = _friends.asStateFlow()
+
+    init {
+        listenToFriends()
+    }
+
+    private fun listenToFriends() {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+
+        Firebase.firestore.collection("users")
+            .document(userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+
+                // Les UIDs stockés dans Firestore
+                val friendUids = (snapshot.get("friends") as? List<*>)
+                    ?.filterIsInstance<String>() ?: emptyList()
+
+                if (friendUids.isEmpty()) {
+                    _friends.value = emptyList()
+                    return@addSnapshotListener
+                }
+
+                val result = mutableListOf<FriendItem>()
+                var remaining = friendUids.size
+
+                for (uid in friendUids) {
+                    Firebase.firestore.collection("users")
+                        .document(uid)
+                        .collection("public")
+                        .document("profile")
+                        .get()
+                        .addOnSuccessListener { profileDoc ->
+                            val playerId = profileDoc.getString("playerId") ?: "???"
+                            val username = profileDoc.getString("username") ?: "Inconnu"
+                            result.add(FriendItem(playerId = playerId, username = username))
+                            remaining--
+                            if (remaining == 0) {
+                                _friends.value = result  // ✅ mise à jour du StateFlow
+                            }
+                        }
+                        .addOnFailureListener {
+                            remaining--
+                            if (remaining == 0) {
+                                _friends.value = result
+                            }
+                        }
+                }
+            }
+    }
+
     fun getFriends(callback: (List<FriendItem>) -> Unit) {
         val userId = Firebase.auth.currentUser?.uid ?: return callback(emptyList())
 
@@ -21,10 +77,10 @@ class FriendManager {
             .get()
             .addOnSuccessListener { document ->
                 val rawFriends = document.get("friends")
-                android.util.Log.d("FriendManager", "Raw friends field: $rawFriends (type: ${rawFriends?.javaClass})")
+                Log.d("FriendManager", "Raw friends field: $rawFriends (type: ${rawFriends?.javaClass})")
 
                 val friendUids = (rawFriends as? List<*>)?.filterIsInstance<String>() ?: emptyList()
-                android.util.Log.d("FriendManager", "Friend UIDs: $friendUids")
+                Log.d("FriendManager", "Friend UIDs: $friendUids")
 
                 if (friendUids.isEmpty()) {
                     callback(emptyList())
@@ -41,7 +97,7 @@ class FriendManager {
                         .document("profile")
                         .get()
                         .addOnSuccessListener { friendDoc ->
-                            android.util.Log.d("FriendManager", "Fetched public profile for $uid, exists=${friendDoc.exists()}, data=${friendDoc.data}")
+                            Log.d("FriendManager", "Fetched public profile for $uid, exists=${friendDoc.exists()}, data=${friendDoc.data}")
                             val playerId = friendDoc.getString("playerId") ?: "???"
                             val username = friendDoc.getString("username") ?: "Inconnu"
                             friends.add(FriendItem(playerId = playerId, username = username))
@@ -135,6 +191,32 @@ class FriendManager {
                     }
                     .addOnFailureListener { e ->
                         Log.e("Firestore", "Erreur lors de l'ajout", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Joueur introuvable", e)
+            }
+    }
+
+    fun deleteFriend(friend: FriendItem){
+        val userId = Firebase.auth.currentUser?.uid ?: return
+        val friendId = friend.playerId
+
+        Firebase.firestore.collection("playerIds")
+            .document(friendId)
+            .get()
+            .addOnSuccessListener { friendDoc ->
+                val friendUid = friendDoc.getString("uid") ?: return@addOnSuccessListener
+
+                // ✅ Ici on est sûr que friendUid est disponible
+                Firebase.firestore.collection("users")
+                    .document(userId)
+                    .update("friends", FieldValue.arrayRemove(friendUid))
+                    .addOnSuccessListener {
+                        Log.d("Firestore", "Ami supprimé avec succès")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Firestore", "Erreur lors de la suppression", e)
                     }
             }
             .addOnFailureListener { e ->
