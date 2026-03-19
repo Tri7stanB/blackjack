@@ -2,10 +2,15 @@ package com.tbart.blackjack
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 class UserManager {
     val firestore = FirebaseFirestore.getInstance()
+
+    val money = MutableStateFlow(1000)
+
 
     // Récupère le code ami depuis Firestore
     fun getPlayerId(onResult: (String?) -> Unit) {
@@ -68,6 +73,13 @@ class UserManager {
                             .document(uid)
                             .set(
                                 mapOf("playerId" to newId),
+                                com.google.firebase.firestore.SetOptions.merge()
+                            )
+
+                        firestore.collection("users")
+                            .document(uid)
+                            .set(
+                                mapOf("currentMoney" to 1000),
                                 com.google.firebase.firestore.SetOptions.merge()
                             )
 

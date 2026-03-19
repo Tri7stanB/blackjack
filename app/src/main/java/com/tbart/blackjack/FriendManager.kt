@@ -16,7 +16,7 @@ data class FriendItem(
 )
 
 class FriendManager {
-
+    val db = Firebase.firestore
     private val _friends = MutableStateFlow<List<FriendItem>>(emptyList())
     val friends: StateFlow<List<FriendItem>> = _friends.asStateFlow()
 
@@ -27,7 +27,7 @@ class FriendManager {
     private fun listenToFriends() {
         val userId = Firebase.auth.currentUser?.uid ?: return
 
-        Firebase.firestore.collection("users")
+        db.collection("users")
             .document(userId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
@@ -45,7 +45,7 @@ class FriendManager {
                 var remaining = friendUids.size
 
                 for (uid in friendUids) {
-                    Firebase.firestore.collection("users")
+                    db.collection("users")
                         .document(uid)
                         .collection("public")
                         .document("profile")
@@ -72,7 +72,7 @@ class FriendManager {
     fun getFriends(callback: (List<FriendItem>) -> Unit) {
         val userId = Firebase.auth.currentUser?.uid ?: return callback(emptyList())
 
-        Firebase.firestore.collection("users")
+        db.collection("users")
             .document(userId)
             .get()
             .addOnSuccessListener { document ->
@@ -91,7 +91,7 @@ class FriendManager {
                 var remaining = friendUids.size
 
                 for (uid in friendUids) {
-                    Firebase.firestore.collection("users")
+                    db.collection("users")
                         .document(uid)
                         .collection("public")
                         .document("profile")
@@ -107,7 +107,7 @@ class FriendManager {
                             }
                         }
                         .addOnFailureListener { e ->
-                            android.util.Log.e("FriendManager", "Failed to fetch public profile for $uid", e)
+                            Log.e("FriendManager", "Failed to fetch public profile for $uid", e)
                             remaining--
                             if (remaining == 0) {
                                 callback(friends)
@@ -121,8 +121,6 @@ class FriendManager {
     }
 
     fun searchFriend(playerId: String, callback: (FriendItem?) -> Unit) {
-
-        val db = Firebase.firestore
 
         // 1️⃣ Chercher dans playerIds
         db.collection("playerIds")
@@ -176,14 +174,14 @@ class FriendManager {
         val userId = Firebase.auth.currentUser?.uid ?: return
         val friendId = friend.playerId
 
-        Firebase.firestore.collection("playerIds")
+        db.collection("playerIds")
             .document(friendId)
             .get()
             .addOnSuccessListener { friendDoc ->
                 val friendUid = friendDoc.getString("uid") ?: return@addOnSuccessListener
 
                 // ✅ Ici on est sûr que friendUid est disponible
-                Firebase.firestore.collection("users")
+                db.collection("users")
                     .document(userId)
                     .update("friends", FieldValue.arrayUnion(friendUid))
                     .addOnSuccessListener {
@@ -202,14 +200,14 @@ class FriendManager {
         val userId = Firebase.auth.currentUser?.uid ?: return
         val friendId = friend.playerId
 
-        Firebase.firestore.collection("playerIds")
+        db.collection("playerIds")
             .document(friendId)
             .get()
             .addOnSuccessListener { friendDoc ->
                 val friendUid = friendDoc.getString("uid") ?: return@addOnSuccessListener
 
                 // ✅ Ici on est sûr que friendUid est disponible
-                Firebase.firestore.collection("users")
+                db.collection("users")
                     .document(userId)
                     .update("friends", FieldValue.arrayRemove(friendUid))
                     .addOnSuccessListener {
@@ -218,6 +216,36 @@ class FriendManager {
                     .addOnFailureListener { e ->
                         Log.e("Firestore", "Erreur lors de la suppression", e)
                     }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Joueur introuvable", e)
+            }
+    }
+
+    fun sendMoneyTo(friend: FriendItem, amount: Int, onResult: (success: Boolean, error: String?) -> Unit) {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+        val friendId = friend.playerId
+
+        db.collection("playerIds")
+            .document(friendId)
+            .get()
+            .addOnSuccessListener { friendDoc ->
+                val friendUid = friendDoc.getString("uid") ?: return@addOnSuccessListener
+
+                val myRef = db.collection("users").document(userId)
+                val friendRef = db.collection("users").document(friendUid)
+
+                db.runTransaction { transaction ->
+                    val myDoc = transaction.get(myRef)
+                    val myMoney = myDoc.getLong("currentMoney") ?: 0
+
+                    if (myMoney < amount) throw Exception("Solde insuffisant")
+
+                    transaction.update(myRef, "currentMoney", myMoney - amount)
+                    transaction.update(friendRef, "currentMoney", FieldValue.increment(amount.toLong()))
+                }
+                    .addOnSuccessListener { onResult(true, null) }
+                    .addOnFailureListener { e -> onResult(false, e.message) }
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Joueur introuvable", e)

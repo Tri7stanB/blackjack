@@ -13,6 +13,7 @@ import com.google.gson.reflect.TypeToken
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.*
+import androidx.core.content.edit
 
 data class DailyRecord(
     val date: String,
@@ -184,7 +185,7 @@ class DailyMoneyManager(context: Context) {
                 if (document.exists()) {
                     val money = document.getLong("currentMoney")?.toInt()
                     if (money != null) {
-                        prefs.edit().putInt(KEY_CURRENT_MONEY, money).apply()
+                        prefs.edit { putInt(KEY_CURRENT_MONEY, money) }
                         Log.d(TAG, "☁️ currentMoney synced: $money")
                     }
                 }
@@ -273,6 +274,10 @@ class DailyMoneyManager(context: Context) {
                 .addOnFailureListener { e ->
                     Log.e(TAG, "❌ Erreur push record $date: ${e.message}")
                 }
+
+            firestore.collection("users")
+                .document(userId)
+                .update("currentMoney", 1000)
         }
     }
 

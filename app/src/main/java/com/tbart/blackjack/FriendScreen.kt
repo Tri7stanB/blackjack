@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,8 +22,10 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.AlertDialog
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +46,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -246,6 +250,16 @@ fun FriendScreen(navController: NavController) {
 
 @Composable
 fun FriendCard(friend : FriendItem, friendButton : Boolean = false, himself : Boolean = false, friendManager: FriendManager = FriendManager()){
+    var showTransferDialog by remember { mutableStateOf(false) }
+
+    if (showTransferDialog) {
+        TransferDialog(
+            friend = friend,
+            onDismiss = { showTransferDialog = false },
+            friendManager = friendManager
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -291,7 +305,9 @@ fun FriendCard(friend : FriendItem, friendButton : Boolean = false, himself : Bo
                             contentColor = Color.White,
                             containerColor = Color(0xFF0B6623)),
                         border = BorderStroke(1.dp, Color.White),
-                        onClick = {}
+                        onClick = {
+                            showTransferDialog = true
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Send,
@@ -322,4 +338,90 @@ fun FriendCard(friend : FriendItem, friendButton : Boolean = false, himself : Bo
             }
         }
     }
+}
+
+@Composable
+fun TransferDialog(
+    friend: FriendItem,
+    onDismiss: () -> Unit,
+    friendManager: FriendManager
+) {
+    var amount by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var selectedButton by remember { mutableStateOf("none") }
+
+    AlertDialog(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        title = { Text("Envoyer de l'argent") },
+        text = {
+            Column {
+                Text("Destinataire : ${friend.username}")
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ){
+                    Button(
+                        onClick = {
+                            selectedButton = if (selectedButton=="50") { "none" } else { "50" }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedButton=="50") Color.Green else Color.Red
+                        )
+                    ) {
+                        Text("50")
+                    }
+                    Spacer(Modifier.padding(8.dp))
+                    Button(
+                        onClick = {
+                            selectedButton = if (selectedButton=="100") { "none" } else { "100" }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedButton=="100") Color.Green else Color.Red
+                        )
+                    ) {
+                        Text("100")
+                    }
+                    Spacer(Modifier.padding(8.dp))
+                    Button(
+                        onClick = {
+                            selectedButton = if (selectedButton=="200") { "none" } else { "200" }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedButton=="200") Color.Green else Color.Red
+                        )
+                    ) {
+                        Text("200")
+                    }
+                }
+                errorMessage?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(it, color = Color.Red, fontSize = 13.sp)
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (selectedButton=="none") {
+                        return@Button
+                    }
+                    isLoading = true
+                    friendManager.sendMoneyTo(friend, selectedButton.toInt()) { success, error ->
+                        isLoading = false
+                        if (success) onDismiss()
+                    }
+                },
+                enabled = !isLoading
+            ) {
+                Text(if (isLoading) "Envoi..." else "Confirmer")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss, enabled = !isLoading) {
+                Text("Annuler")
+            }
+        }
+    )
 }
