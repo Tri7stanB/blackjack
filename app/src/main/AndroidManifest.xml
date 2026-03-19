@@ -18,13 +18,13 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name=".RegisterActivity"
+            android:name=".activity.RegisterActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.BlackJack">
         </activity>
         <activity
-            android:name=".ConnectionActivity"
+            android:name=".activity.ConnectionActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.BlackJack">
