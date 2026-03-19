@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +47,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tbart.blackjack.data.manager.BlackjackManager
+import com.tbart.blackjack.data.manager.UserManager
 import com.tbart.blackjack.viewmodel.BlackjackViewModel
 import com.tbart.blackjack.ui.navigation.Screen
 import com.tbart.blackjack.ui.component.CardImage
@@ -139,8 +142,13 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
     val game = viewModel.game
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        Log.d("BLACKJACK_DEBUG", "⚡ LaunchedEffect exécuté")
+    val blackjackManager = remember { BlackjackManager() }
+    // Collecte la valeur du StateFlow en temps réel → recompose quand ça change
+    val currentMoney by blackjackManager.money.collectAsState()
+
+    // Synchroniser l'argent du joueur AVANT le début de la partie
+    if (viewModel.waitingForBet) {
+        game.player.money = currentMoney
     }
 
     Column(
@@ -162,7 +170,9 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                     .padding(8.dp)
             )
             {
-                Text("Argent : ${game.player.money}", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                // Affiche currentMoney (état Compose) avant la partie, game.player.money pendant la partie
+                val displayMoney = if (viewModel.waitingForBet) currentMoney else game.player.money
+                Text("Argent : $displayMoney", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
 
         }
         }

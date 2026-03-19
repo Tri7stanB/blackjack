@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class FriendManager {
     val db = Firebase.firestore
-    private val _friends = MutableStateFlow<List<FriendItem>>(emptyList())
-    val friends: StateFlow<List<FriendItem>> = _friends.asStateFlow()
+    private val _friends = MutableStateFlow<List<FriendItem>>(emptyList()) // version privée et modifiable
+    val friends: StateFlow<List<FriendItem>> = _friends.asStateFlow() // version publique en lecture seule pour l'écran
 
     init {
         listenToFriends()
