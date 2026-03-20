@@ -35,9 +35,11 @@ import androidx.compose.ui.unit.sp
 import com.tbart.blackjack.game.BlackjackGame
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
@@ -142,6 +144,9 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
     val game = viewModel.game
     val coroutineScope = rememberCoroutineScope()
 
+    val playerScrollState = rememberScrollState()
+    val dealerScrollState = rememberScrollState()
+
     val blackjackManager = remember { BlackjackManager() }
     // Collecte la valeur du StateFlow en temps réel → recompose quand ça change
     val currentMoney by blackjackManager.money.collectAsState()
@@ -149,6 +154,18 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
     // Synchroniser l'argent du joueur AVANT le début de la partie
     if (viewModel.waitingForBet) {
         game.player.money = currentMoney
+    }
+
+    LaunchedEffect(playerScrollState.maxValue) {
+        if (playerScrollState.maxValue > 0) {
+            playerScrollState.animateScrollTo(playerScrollState.maxValue)
+        }
+    }
+
+    LaunchedEffect(dealerScrollState.maxValue) {
+        if (dealerScrollState.maxValue > 0) {
+            dealerScrollState.animateScrollTo(dealerScrollState.maxValue)
+        }
     }
 
     Column(
@@ -227,27 +244,34 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
         } else {
         // --- Zone Croupier ---
         Column() {
-            Text("Croupier", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            Row {
+            Text("Croupier", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(start = 10.dp))
+            Row(
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .horizontalScroll(dealerScrollState)
+            ) {
                 game.getDealerCards().forEach { card ->
                     CardImage(rank = card.rank.toString(), suit = card.suit.toString())
                 }
             }
-            Text("Score: ${game.dealerScore}", color = Color.White)
+            Text("Score: ${game.dealerScore}", color = Color.White, modifier = Modifier.padding(start = 10.dp))
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         // --- Zone Joueur ---
         Column() {
-            Text("Joueur", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            Row (    modifier = Modifier.padding(start = 16.dp)
+            Text("Joueur", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(start = 10.dp))
+            Row (
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .horizontalScroll(playerScrollState)
             ){
                 game.getPlayerCards().forEach { card ->
                     CardImage(rank = card.rank.toString(), suit = card.suit.toString())
                 }
             }
-            Text("Score: ${game.playerScore}", color = Color.White)
+            Text("Score: ${game.playerScore}", color = Color.White, modifier = Modifier.padding(start = 10.dp))
         }
 
         Spacer(modifier = Modifier.height(20.dp))
