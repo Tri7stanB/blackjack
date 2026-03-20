@@ -87,13 +87,15 @@ class DailyMoneyManager(context: Context) {
                 saveDailyRecord(lastResetDate, currentMoney)
             }
 
-            // Reset l'argent
+            // Met à jour la date AVANT saveCurrentMoney pour éviter une boucle
             prefs.edit()
-                .putInt(KEY_CURRENT_MONEY, STARTING_MONEY)
                 .putString(KEY_LAST_RESET_DATE, today)
                 .apply()
 
-            Log.d(TAG, "🔄 Argent reset à $STARTING_MONEY")
+            // Reset l'argent localement ET sur Firestore
+            saveCurrentMoney(STARTING_MONEY)
+
+            Log.d(TAG, "🔄 Argent reset à $STARTING_MONEY (local + Firestore)")
             Log.d(TAG, "🔄 Date mise à jour: $today")
         } else {
             Log.d(TAG, "❌ Même jour ($today), pas de reset")
@@ -165,6 +167,7 @@ class DailyMoneyManager(context: Context) {
         Log.d(TAG, "✅ Reset forcé effectué")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun syncFromFirestore(onComplete: (() -> Unit)? = null) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
             onComplete?.invoke()
@@ -186,12 +189,16 @@ class DailyMoneyManager(context: Context) {
                     }
                 }
 
-                // 2. Sync dailyGains history (bidirectional)
+                // 2. Vérifier le reset APRÈS avoir sync depuis Firestore
+                checkAndResetIfNewDay()
+
+                // 3. Sync dailyGains history (bidirectional)
                 syncDailyHistory(userId, onComplete)
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "❌ Erreur sync currentMoney: ${e.message}")
                 // En cas d'erreur réseau, on continue avec les données locales
+                checkAndResetIfNewDay()
                 onComplete?.invoke()
             }
     }
@@ -271,9 +278,6 @@ class DailyMoneyManager(context: Context) {
                     Log.e(TAG, "❌ Erreur push record $date: ${e.message}")
                 }
 
-            firestore.collection("users")
-                .document(userId)
-                .update("currentMoney", 1000)
         }
     }
 
