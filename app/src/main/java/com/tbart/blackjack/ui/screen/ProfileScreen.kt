@@ -4,13 +4,16 @@ import android.R
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -282,69 +285,97 @@ fun ProfileScreen(navController: NavController) {
                         .padding(16.dp)
                         .padding(bottom = 24.dp)
                 ) {
-                    Text(
-                        text = "Profil",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.padding(16.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Text(
-                            text = "Pseudo : $username",
-                            fontSize = 18.sp,
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
+                    Row(){
+                        Column() {
+                            Text(
+                                text = "Profil",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.padding(16.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ){
+                                Text(
+                                    text = "Pseudo : $username",
+                                    fontSize = 18.sp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Button(
+                                    onClick = {
+                                        showDialog = true
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = Color.White,
+                                        containerColor = Color(0xFF0B6623)
+                                    ),
+                                )
+                                {
+                                    Icon(
+                                        imageVector = Icons.Filled.Create,
+                                        contentDescription = "Modifier le pseudo",
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
+                                fontSize = 18.sp,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.height(32.dp))
+                            Text(
+                                text = "Code ami : ${friendCode ?: "Code ami non trouvé"}",
+                                fontSize = 18.sp,
+                                color = Color.White
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
                         Button(
                             onClick = {
-                                showDialog = true
+                                auth.signOut()
+                                val intent = Intent(context, ConnectionActivity::class.java)
+                                context.startActivity(intent)
                             },
                             colors = ButtonDefaults.buttonColors(
                                 contentColor = Color.White,
                                 containerColor = Color(0xFF0B6623)
                             ),
-                            )
-                        {
-                            Icon(
-                                imageVector = Icons.Filled.Create,
-                                contentDescription = "Modifier le pseudo",
-                                tint = Color.White
+                            border = BorderStroke(1.dp, Color.White),
+                        ) {
+                            Text(
+                                "Se déconnecter",
+                                color = Color.White
                             )
                         }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
-                        fontSize = 18.sp,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Text(
-                        text = "Code ami : ${friendCode ?: "Chargement..."}",
-                        fontSize = 18.sp,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(48.dp))
-                    Button(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = {
-                            auth.signOut()
-                            val intent = Intent(context, ConnectionActivity::class.java)
-                            context.startActivity(intent)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            contentColor = Color.White,
-                            containerColor = Color(0xFF0B6623)
-                        ),
-                        border = BorderStroke(1.dp, Color.White),
-                    ) {
-                        Text(
-                            "Se déconnecter",
-                            color = Color.White
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                userManager.deleteAccount {
+                                    auth.signOut()
+                                    val intent = Intent(context, ConnectionActivity::class.java)
+                                    context.startActivity(intent)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = Color.Red,
+                                containerColor = Color(0xFF0B6623)
+                            ),
+                            border = BorderStroke(1.dp, Color.Red),
+                        ) {
+                            Text(
+                                "Supprimer mon compte",
+                                color = Color.Red
+                            )
+                        }
                     }
                 }
             }

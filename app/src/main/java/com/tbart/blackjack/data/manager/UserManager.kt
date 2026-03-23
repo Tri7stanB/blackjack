@@ -2,6 +2,7 @@ package com.tbart.blackjack.data.manager
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -138,6 +139,55 @@ class UserManager {
             .collection("public")
             .document("profile")
             .set(data, com.google.firebase.firestore.SetOptions.merge())
+    }
+
+    fun deleteAccount(onComplete: () -> Unit = {}) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        getPlayerId { playerId ->
+
+            // Supprimer dailyGains en premier
+            db.collection("users").document(uid)
+                .collection("dailyGains")
+                .get()
+                .addOnSuccessListener { snapshot ->
+
+                    val tasks = snapshot.documents.map { it.reference.delete() }
+
+                    Tasks.whenAll(tasks).addOnSuccessListener {
+
+                        // Supprimer public/profile
+                        db.collection("users").document(uid)
+                            .collection("public").document("profile")
+                            .delete()
+                            .addOnSuccessListener {
+
+                                // Supprimer le document user principal
+                                db.collection("users").document(uid)
+                                    .delete()
+                                    .addOnSuccessListener {
+
+                                        // Supprimer playerIds
+                                        val playerTask = if (!playerId.isNullOrEmpty()) {
+                                            db.collection("playerIds").document(playerId).delete()
+                                        } else {
+                                            Tasks.forResult(null)
+                                        }
+
+                                        playerTask.addOnSuccessListener {
+
+                                            // Supprimer le compte Auth EN DERNIER
+                                            FirebaseAuth.getInstance().currentUser
+                                                ?.delete()
+                                                ?.addOnSuccessListener {
+                                                    onComplete() // ✅ Seulement ici
+                                                }
+                                        }
+                                    }
+                            }
+                    }
+                }
+        }
     }
 
 }
