@@ -141,53 +141,45 @@ class UserManager {
             .set(data, com.google.firebase.firestore.SetOptions.merge())
     }
 
-    fun deleteAccount(onComplete: () -> Unit = {}) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    fun deleteAccount(onComplete: () -> Unit = {}, onError: (Exception) -> Unit = {}) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val uid = user.uid
 
         getPlayerId { playerId ->
 
-            // Supprimer dailyGains en premier
+            // 1. Supprimer dailyGains
             db.collection("users").document(uid)
-                .collection("dailyGains")
-                .get()
+                .collection("dailyGains").get()
                 .addOnSuccessListener { snapshot ->
-
                     val tasks = snapshot.documents.map { it.reference.delete() }
+                    Tasks.whenAll(tasks)
+                        .addOnCompleteListener { // addOnComplete = peu importe si ça échoue, on continue
+                            // 2. Supprimer public/profile
+                            db.collection("users").document(uid)
+                                .collection("public").document("profile").delete()
+                                .addOnCompleteListener {
+                                    // 3. Supprimer playerIds
+                                    val playerTask = if (!playerId.isNullOrEmpty())
+                                        db.collection("playerIds").document(playerId).delete()
+                                    else Tasks.forResult(null)
 
-                    Tasks.whenAll(tasks).addOnSuccessListener {
-
-                        // Supprimer public/profile
-                        db.collection("users").document(uid)
-                            .collection("public").document("profile")
-                            .delete()
-                            .addOnSuccessListener {
-
-                                // Supprimer le document user principal
-                                db.collection("users").document(uid)
-                                    .delete()
-                                    .addOnSuccessListener {
-
-                                        // Supprimer playerIds
-                                        val playerTask = if (!playerId.isNullOrEmpty()) {
-                                            db.collection("playerIds").document(playerId).delete()
-                                        } else {
-                                            Tasks.forResult(null)
-                                        }
-
-                                        playerTask.addOnSuccessListener {
-
-                                            // Supprimer le compte Auth EN DERNIER
-                                            FirebaseAuth.getInstance().currentUser
-                                                ?.delete()
-                                                ?.addOnSuccessListener {
-                                                    onComplete() // ✅ Seulement ici
-                                                }
-                                        }
+                                    playerTask.addOnCompleteListener {
+                                        // 4. Supprimer le document user principal
+                                        db.collection("users").document(uid).delete()
+                                            .addOnCompleteListener {
+                                                // 5. Supprimer le compte Auth EN DERNIER
+                                                user.delete()
+                                                    .addOnSuccessListener { onComplete() }
+                                                    .addOnFailureListener { exception -> onError(exception) }
+                                            }
                                     }
-                            }
-                    }
+                                }
+                        }
                 }
+                .addOnFailureListener { exception -> onError(exception) }
         }
     }
+
+
 
 }

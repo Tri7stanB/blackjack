@@ -42,9 +42,6 @@ class ConnectionActivity : AppCompatActivity() {
 
         // Enregistrer l'ouverture de l'app aujourd'hui
         recordAppOpen()
-        // Supprimer la notification si elle est encore affichée
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
-        notificationManager.cancel(DailyReminderWorker.NOTIFICATION_ID)
         // Planifier la notification quotidienne à 17h
         NotificationScheduler.scheduleDailyReminder(this)
         // Demander la permission de notifications (Android 13+)

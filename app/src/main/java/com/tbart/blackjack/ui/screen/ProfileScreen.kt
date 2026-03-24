@@ -58,9 +58,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.tbart.blackjack.activity.ConnectionActivity
 import com.tbart.blackjack.data.manager.UserManager
 import com.tbart.blackjack.ui.navigation.Screen
@@ -82,6 +85,9 @@ fun ProfileScreen(navController: NavController) {
     val pullToRefreshState = rememberPullToRefreshState()
 
     var showDialog by remember { mutableStateOf(false) }
+    var showReauthDialog by remember { mutableStateOf(false) }
+    var reauthPassword by remember { mutableStateOf("") }
+    var reauthError by remember { mutableStateOf<String?>(null) }
 
 
     // Fonction de chargement des données
@@ -359,11 +365,18 @@ fun ProfileScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                userManager.deleteAccount {
-                                    auth.signOut()
-                                    val intent = Intent(context, ConnectionActivity::class.java)
-                                    context.startActivity(intent)
-                                }
+                                userManager.deleteAccount(
+                                    onComplete = {
+                                        auth.signOut()
+                                        val intent = Intent(context, ConnectionActivity::class.java)
+                                        context.startActivity(intent)
+                                    },
+                                    onError = { exception ->
+                                        if (exception is com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException) {
+                                            showReauthDialog = true
+                                        }
+                                    }
+                                )
                             },
                             colors = ButtonDefaults.buttonColors(
                                 contentColor = Color.Red,
@@ -380,5 +393,54 @@ fun ProfileScreen(navController: NavController) {
                 }
             }
         }
+    }
+
+    if (showReauthDialog) {
+        AlertDialog(
+            onDismissRequest = { showReauthDialog = false; reauthPassword = ""; reauthError = null },
+            title = { Text("Confirme la suppression") },
+            text = {
+                Column {
+                    Text("Entre ton mot de passe pour confirmer.")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = reauthPassword,
+                        onValueChange = { reauthPassword = it; reauthError = null },
+                        label = { Text("Mot de passe") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation()
+                    )
+                    reauthError?.let {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(it, color = Color.Red, fontSize = 13.sp)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    val user = auth.currentUser ?: return@Button
+                    val email = user.email ?: return@Button
+                    val credential = EmailAuthProvider.getCredential(email, reauthPassword)
+                    user.reauthenticate(credential)
+                        .addOnSuccessListener {
+                            showReauthDialog = false
+                            reauthPassword = ""
+                            userManager.deleteAccount(
+                                onComplete = {
+                                    auth.signOut()
+                                    val intent = Intent(context, ConnectionActivity::class.java)
+                                    context.startActivity(intent)
+                                }
+                            )
+                        }
+                        .addOnFailureListener { reauthError = "Mot de passe incorrect." }
+                }) { Text("Confirmer") }
+            },
+            dismissButton = {
+                Button(onClick = { showReauthDialog = false; reauthPassword = ""; reauthError = null }) {
+                    Text("Annuler")
+                }
+            }
+        )
     }
 }
