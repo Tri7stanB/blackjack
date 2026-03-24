@@ -1,6 +1,7 @@
 package com.tbart.blackjack.ui.screen
 
 import android.R
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -68,6 +69,7 @@ import com.tbart.blackjack.activity.ConnectionActivity
 import com.tbart.blackjack.data.manager.UserManager
 import com.tbart.blackjack.ui.navigation.Screen
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController) {
@@ -80,9 +82,6 @@ fun ProfileScreen(navController: NavController) {
     // État pour le code ami (chargé de manière asynchrone)
     var friendCode by remember { mutableStateOf<String?>(null) }
     var username: String? by remember { mutableStateOf("") }
-    // État pour le pull-to-refresh
-    var isRefreshing by remember { mutableStateOf(false) }
-    val pullToRefreshState = rememberPullToRefreshState()
 
     var showDialog by remember { mutableStateOf(false) }
     var showReauthDialog by remember { mutableStateOf(false) }
@@ -261,35 +260,13 @@ fun ProfileScreen(navController: NavController) {
                 }
             }
         ) { innerPadding ->
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = {
-                    scope.launch {
-                        isRefreshing = true
-                        loadData()
-                        delay(1000) // Petit délai pour que l'animation soit visible
-                        isRefreshing = false
-                    }
-                },
-                modifier = Modifier.padding(innerPadding),
-                state = pullToRefreshState,
-                indicator = {
-                    Indicator(
-                        modifier = Modifier.align(Alignment.TopCenter),
-                        isRefreshing = isRefreshing,
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        state = pullToRefreshState
-                    )
-                }
-            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                         .background(Color(0xFF0B6623))
                         .padding(16.dp)
-                        .padding(bottom = 24.dp)
+                        .padding(innerPadding)
                 ) {
                     Row(){
                         Column() {
@@ -393,7 +370,7 @@ fun ProfileScreen(navController: NavController) {
                 }
             }
         }
-    }
+
 
     if (showReauthDialog) {
         AlertDialog(
