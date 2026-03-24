@@ -1,13 +1,18 @@
 package com.tbart.blackjack.activity
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -15,6 +20,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.tbart.blackjack.R
 import com.tbart.blackjack.MainActivity
 import com.tbart.blackjack.data.manager.DailyMoneyManager
+import com.tbart.blackjack.data.worker.DailyReminderWorker
+import com.tbart.blackjack.data.worker.NotificationScheduler
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ConnectionActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -29,6 +39,16 @@ class ConnectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
+
+        // Enregistrer l'ouverture de l'app aujourd'hui
+        recordAppOpen()
+        // Supprimer la notification si elle est encore affichée
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        notificationManager.cancel(DailyReminderWorker.NOTIFICATION_ID)
+        // Planifier la notification quotidienne à 17h
+        NotificationScheduler.scheduleDailyReminder(this)
+        // Demander la permission de notifications (Android 13+)
+        requestNotificationPermission()
 
         // 1. Vérifier si l'utilisateur est déjà connecté
         // VERIFICATION DE LA SESSION
@@ -63,6 +83,28 @@ class ConnectionActivity : AppCompatActivity() {
         signUpButton.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun recordAppOpen() {
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        getSharedPreferences(DailyReminderWorker.PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(DailyReminderWorker.KEY_LAST_OPEN_DATE, today)
+            .apply()
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    100
+                )
+            }
         }
     }
 
