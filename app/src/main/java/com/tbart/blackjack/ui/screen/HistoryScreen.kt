@@ -1,6 +1,8 @@
 package com.tbart.blackjack.ui.screen
 
 import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +24,7 @@ import com.tbart.blackjack.viewmodel.BlackjackViewModel
 import com.tbart.blackjack.ui.navigation.Screen
 import com.tbart.blackjack.ui.component.DailyRecordItem
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HistoryScreen(navController: NavHostController, viewModel: BlackjackViewModel) {
     val history = viewModel.getDailyHistory()

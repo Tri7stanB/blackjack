@@ -4,6 +4,7 @@ import android.R
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,12 +36,16 @@ import androidx.compose.ui.unit.sp
 import com.tbart.blackjack.game.BlackjackGame
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -55,6 +60,7 @@ import com.tbart.blackjack.viewmodel.BlackjackViewModel
 import com.tbart.blackjack.ui.navigation.Screen
 import com.tbart.blackjack.ui.component.CardImage
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BlackjackGameScreen(navController: NavHostController, gameViewModel: BlackjackViewModel) {
 
@@ -181,16 +187,25 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
         Row() {
             Spacer(modifier = Modifier.weight(1f))
 
-            Box (
-                modifier = Modifier
-                    .background(Color(0xFF333333), shape = RoundedCornerShape(16.dp))
-                    .padding(8.dp)
+            Card (
+                modifier = Modifier.padding(10.dp),
+                shape = RoundedCornerShape(1.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF0B6623)
+                ),
+                border = BorderStroke(1.dp, Color.White)
             )
             {
-                // Affiche currentMoney (état Compose) avant la partie, game.player.money pendant la partie
-                val displayMoney = if (viewModel.waitingForBet) currentMoney else game.player.money
-                Text("Argent : $displayMoney", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                Row(
+                    modifier = Modifier
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    // Affiche currentMoney (état Compose) avant la partie, game.player.money pendant la partie
+                    val displayMoney = if (viewModel.waitingForBet) currentMoney else game.player.money
+                    Text("Argent : $displayMoney", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
 
+                }
         }
         }
 
@@ -234,7 +249,11 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                                 viewModel.message = "Mise invalide"
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C))
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.White,
+                            containerColor = Color(0xFF0B6623)
+                        ),
+                        border = BorderStroke(1.dp, Color.White),
                     ) {
                         Text("Miser $mise", color = Color.White)
                     }
@@ -245,6 +264,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
         // --- Zone Croupier ---
         Column() {
             Text("Croupier", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(start = 10.dp))
+            Spacer(Modifier.padding(5.dp))
             Row(
                 modifier = Modifier
                     .padding(start = 10.dp)
@@ -254,6 +274,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                     CardImage(rank = card.rank.toString(), suit = card.suit.toString())
                 }
             }
+            Spacer(Modifier.padding(5.dp))
             Text("Score: ${game.dealerScore}", color = Color.White, modifier = Modifier.padding(start = 10.dp))
         }
 
@@ -262,6 +283,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
         // --- Zone Joueur ---
         Column() {
             Text("Joueur", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(start = 10.dp))
+            Spacer(Modifier.padding(5.dp))
             Row (
                 modifier = Modifier
                     .padding(start = 10.dp)
@@ -271,6 +293,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                     CardImage(rank = card.rank.toString(), suit = card.suit.toString())
                 }
             }
+            Spacer(Modifier.padding(5.dp))
             Text("Score: ${game.playerScore}", color = Color.White, modifier = Modifier.padding(start = 10.dp))
         }
 
@@ -299,8 +322,11 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                     }
                 },
                 enabled = !viewModel.gameOver,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5))
-            ) {
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = Color.White,
+                    containerColor = Color(0xFF0B6623)
+                ),
+                border = BorderStroke(1.dp, Color.White),            ) {
                 Text("Tirer", color = Color.White)
             }
 
@@ -325,8 +351,12 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                     }
                 },
                 enabled = !viewModel.gameOver,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
-            ) {
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = Color.White,
+                    containerColor = Color(0xFF0B6623)
+                ),
+                border = BorderStroke(1.dp, Color.White),
+                ) {
                 Text("Rester", color = Color.White)
             }
         }
@@ -349,8 +379,11 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                                 viewModel.message = "Mise invalide"
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C))
-                    ) {
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.White,
+                            containerColor = Color(0xFF0B6623)
+                        ),
+                        border = BorderStroke(1.dp, Color.White),                    ) {
                         Text("Miser $mise", color = Color.White)
                     }
                 }

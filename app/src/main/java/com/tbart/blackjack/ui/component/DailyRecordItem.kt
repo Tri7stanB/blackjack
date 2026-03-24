@@ -1,5 +1,6 @@
 package com.tbart.blackjack.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tbart.blackjack.data.model.DailyRecord
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun DailyRecordItem(record: DailyRecord) {
@@ -23,8 +26,9 @@ fun DailyRecordItem(record: DailyRecord) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2E2E2E)
-        )
+            containerColor = Color(0xFF0B6623)
+        ),
+        border = BorderStroke(1.dp, Color.White)
     ) {
         Row(
             modifier = Modifier
@@ -34,7 +38,12 @@ fun DailyRecordItem(record: DailyRecord) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = record.date,
+                text = try {
+                    val parsed = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(record.date)
+                    SimpleDateFormat("EEE dd MMM yyyy", Locale.FRENCH).format(parsed!!)
+                } catch (e: Exception) {
+                    record.date
+                },
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
