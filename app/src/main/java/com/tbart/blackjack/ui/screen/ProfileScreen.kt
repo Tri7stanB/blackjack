@@ -17,12 +17,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
@@ -55,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -63,13 +62,10 @@ import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.launch
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
-import com.tbart.blackjack.R
 import com.tbart.blackjack.activity.ConnectionActivity
 import com.tbart.blackjack.data.manager.UserManager
 import com.tbart.blackjack.ui.navigation.Screen
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +89,6 @@ fun ProfileScreen(navController: NavController) {
     val clip: ClipData = ClipData.newPlainText("code ami", friendCode)
 
 
-
     // Fonction de chargement des données
     fun loadData() {
         userManager.getPlayerId { id ->
@@ -105,15 +100,16 @@ fun ProfileScreen(navController: NavController) {
     }
 
     fun textCopyThenPost(textCopied: String?) {
-        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboardManager.setPrimaryClip(ClipData.newPlainText   ("", textCopied))
+        val clipboardManager =
+            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", textCopied))
         // Only show a toast for Android 12 and lower.
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
             Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
     }
 
     @Composable
-    fun showDialog(){
+    fun showDialog() {
         showDialog = true
         Dialog(
             onDismissRequest = { showDialog = false },
@@ -132,7 +128,7 @@ fun ProfileScreen(navController: NavController) {
                         containerColor = Color(0xFF0B6623),
                         contentColor = Color.White
                     )
-                ){
+                ) {
                     Column() {
                         Spacer(modifier = Modifier.padding(8.dp))
                         Row() {
@@ -149,7 +145,8 @@ fun ProfileScreen(navController: NavController) {
                                         unfocusedBorderColor = Color.White,
                                         unfocusedLabelColor = Color.White,
                                         focusedLabelColor = Color.White,
-                                        cursorColor = Color.White),
+                                        cursorColor = Color.White
+                                    ),
                                 )
                             }
                             Spacer(modifier = Modifier.padding(8.dp))
@@ -168,7 +165,7 @@ fun ProfileScreen(navController: NavController) {
                                     containerColor = Color(0xFF0B6623)
                                 ),
                                 border = BorderStroke(1.dp, Color.White)
-                            ){
+                            ) {
                                 Text(
                                     text = "Annuler",
                                     color = Color.White
@@ -186,7 +183,7 @@ fun ProfileScreen(navController: NavController) {
                                     containerColor = Color(0xFF0B6623),
                                 ),
                                 border = BorderStroke(1.dp, Color.White)
-                            ){
+                            ) {
                                 Text(
                                     text = "Valider",
                                     color = Color.White
@@ -273,129 +270,131 @@ fun ProfileScreen(navController: NavController) {
                 }
             }
         ) { innerPadding ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .background(Color(0xFF0B6623))
-                        .padding(16.dp)
-                        .padding(innerPadding)
-                ) {
-                    Row(){
-                        Column() {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .background(Color(0xFF0B6623))
+                    .padding(16.dp)
+                    .padding(innerPadding)
+            ) {
+                Row() {
+                    Column() {
+                        Text(
+                            text = "Profil",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.padding(16.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
-                                text = "Profil",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                            Spacer(modifier = Modifier.padding(16.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ){
-                                Text(
-                                    text = "Pseudo : $username",
-                                    fontSize = 18.sp,
-                                    color = Color.White
-                                )
-                                Button(
-                                    onClick = {
-                                        showDialog = true
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        contentColor = Color.White,
-                                        containerColor = Color(0xFF0B6623)
-                                    ),
-                                )
-                                {
-                                    Icon(
-                                        imageVector = Icons.Filled.Create,
-                                        contentDescription = "Modifier le pseudo",
-                                        tint = Color.White
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
+                                text = "Pseudo : $username",
                                 fontSize = 18.sp,
                                 color = Color.White
                             )
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ){
-                                Text(
-                                    text = "Code ami : ${friendCode ?: "Code ami non trouvé"}",
-                                    fontSize = 18.sp,
-                                    color = Color.White
+                            Button(
+                                onClick = {
+                                    showDialog = true
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    contentColor = Color.White,
+                                    containerColor = Color(0xFF0B6623)
+                                ),
+                            )
+                            {
+                                Icon(
+                                    imageVector = Icons.Filled.Create,
+                                    contentDescription = "Modifier le pseudo",
+                                    tint = Color.White
                                 )
-                                Button(
-                                    onClick = {
-                                        textCopyThenPost(friendCode)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        contentColor = Color.White,
-                                        containerColor = Color(0xFF0B6623)
-                                    ),
-                                ){
-                                    Icon(
-                                        imageVector = Icons.Outlined.ContentCopy,
-                                        contentDescription = "Copier le code ami",
-                                        tint = Color.White,
-                                    )
-                                }
-                                }
                             }
                         }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Button(
-                            onClick = {
-                                auth.signOut()
-                                val intent = Intent(context, ConnectionActivity::class.java)
-                                context.startActivity(intent)
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                contentColor = Color.White,
-                                containerColor = Color(0xFF0B6623)
-                            ),
-                            border = BorderStroke(1.dp, Color.White),
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Email : ${auth.currentUser?.email ?: "Non connecté"}",
+                            fontSize = 18.sp,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Se déconnecter",
+                                text = "Code ami : ${friendCode ?: "Code ami non trouvé"}",
+                                fontSize = 18.sp,
                                 color = Color.White
                             )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = {
-                                showReauthDialog = true
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                contentColor = Color.Red,
-                                containerColor = Color(0xFF0B6623)
-                            ),
-                            border = BorderStroke(1.dp, Color.Red),
-                        ) {
-                            Text(
-                                "Supprimer mon compte",
-                                color = Color.Red
-                            )
+                            Button(
+                                onClick = {
+                                    textCopyThenPost(friendCode)
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    contentColor = Color.White,
+                                    containerColor = Color(0xFF0B6623)
+                                ),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ContentCopy,
+                                    contentDescription = "Copier le code ami",
+                                    tint = Color.White,
+                                )
+                            }
                         }
                     }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Button(
+                        onClick = {
+                            auth.signOut()
+                            val intent = Intent(context, ConnectionActivity::class.java)
+                            context.startActivity(intent)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.White,
+                            containerColor = Color(0xFF0B6623)
+                        ),
+                        border = BorderStroke(1.dp, Color.White),
+                    ) {
+                        Text(
+                            "Se déconnecter",
+                            color = Color.White
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            showReauthDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.Red,
+                            containerColor = Color(0xFF0B6623)
+                        ),
+                        border = BorderStroke(1.dp, Color.Red),
+                    ) {
+                        Text(
+                            "Supprimer mon compte",
+                            color = Color.Red
+                        )
                     }
                 }
             }
+        }
+    }
 
 
 
     if (showReauthDialog) {
         AlertDialog(
-            onDismissRequest = { showReauthDialog = false; reauthPassword = ""; reauthError = null },
+            onDismissRequest = {
+                showReauthDialog = false; reauthPassword = ""; reauthError = null
+            },
             title = { Text("Es-tu sûr de vouloir supprimer ton compte ?", color = Color.White) },
             containerColor = Color(0xFF0B6623),
             text = {
@@ -413,7 +412,8 @@ fun ProfileScreen(navController: NavController) {
                             unfocusedBorderColor = Color.White,
                             unfocusedLabelColor = Color.White,
                             focusedLabelColor = Color.White,
-                            cursorColor = Color.White)
+                            cursorColor = Color.White
+                        )
                     )
                     reauthError?.let {
                         Spacer(modifier = Modifier.height(4.dp))
@@ -422,43 +422,49 @@ fun ProfileScreen(navController: NavController) {
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    val user = auth.currentUser ?: return@Button
-                    val email = user.email ?: return@Button
-                    val credential = EmailAuthProvider.getCredential(email, reauthPassword)
-                    user.reauthenticate(credential)
-                        .addOnSuccessListener {
-                            showReauthDialog = false
-                            reauthPassword = ""
-                            userManager.deleteAccount(
-                                onComplete = {
-                                    auth.signOut()
-                                    val intent = Intent(context, ConnectionActivity::class.java)
-                                    context.startActivity(intent)
-                                }
-                            )
-                        }
-                        .addOnFailureListener { reauthError = "Mot de passe incorrect." }
-                                 },
+                Button(
+                    onClick = {
+                        val user = auth.currentUser ?: return@Button
+                        val email = user.email ?: return@Button
+                        val credential = EmailAuthProvider.getCredential(email, reauthPassword)
+                        user.reauthenticate(credential)
+                            .addOnSuccessListener {
+                                showReauthDialog = false
+                                reauthPassword = ""
+                                userManager.deleteAccount(
+                                    onComplete = {
+                                        auth.signOut()
+                                        val intent = Intent(context, ConnectionActivity::class.java)
+                                        context.startActivity(intent)
+                                    }
+                                )
+                            }
+                            .addOnFailureListener { reauthError = "Mot de passe incorrect." }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color.Red,
                         containerColor = Color(0xFF0B6623)
                     ),
-                   border = BorderStroke(1.dp, Color.Red),
+                    border = BorderStroke(1.dp, Color.Red),
                 ) {
                     Text("Confirmer")
                 }
             },
-            dismissButton = {
-                Button(onClick = { showReauthDialog = false; reauthPassword = ""; reauthError = null },
-                    colors = ButtonDefaults.buttonColors(
-                        contentColor = Color.White,
-                        containerColor = Color(0xFF0B6623)
-                    ),
-                    border = BorderStroke(1.dp, Color.White),) {
-                    Text("Annuler")
+            dismissButton =
+                {
+                    Button(
+                        onClick = {
+                            showReauthDialog = false; reauthPassword = ""; reauthError = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.White,
+                            containerColor = Color(0xFF0B6623)
+                        ),
+                        border = BorderStroke(1.dp, Color.White),
+                    ) {
+                        Text("Annuler")
+                    }
                 }
-            }
         )
     }
 }
