@@ -1,44 +1,46 @@
 package com.tbart.blackjack.ui.screen
 
-import android.R
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,11 +62,11 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import com.tbart.blackjack.R
 import com.tbart.blackjack.activity.ConnectionActivity
 import com.tbart.blackjack.data.manager.UserManager
 import com.tbart.blackjack.ui.navigation.Screen
@@ -88,6 +90,9 @@ fun ProfileScreen(navController: NavController) {
     var reauthPassword by remember { mutableStateOf("") }
     var reauthError by remember { mutableStateOf<String?>(null) }
 
+    val clip: ClipData = ClipData.newPlainText("code ami", friendCode)
+
+
 
     // Fonction de chargement des données
     fun loadData() {
@@ -97,6 +102,14 @@ fun ProfileScreen(navController: NavController) {
         userManager.getUsername { name ->
             username = name
         }
+    }
+
+    fun textCopyThenPost(textCopied: String?) {
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboardManager.setPrimaryClip(ClipData.newPlainText   ("", textCopied))
+        // Only show a toast for Android 12 and lower.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
     }
 
     @Composable
@@ -115,7 +128,7 @@ fun ProfileScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(16.dp),
                     shape = RoundedCornerShape(8.dp),
-                    colors = androidx.compose.material3.CardDefaults.cardColors(
+                    colors = CardDefaults.cardColors(
                         containerColor = Color(0xFF0B6623),
                         contentColor = Color.White
                     )
@@ -131,7 +144,7 @@ fun ProfileScreen(navController: NavController) {
                                     label = { Text("Nouveau pseudo") },
                                     textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
                                     singleLine = true,
-                                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                                    colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = Color.White,
                                         unfocusedBorderColor = Color.White,
                                         unfocusedLabelColor = Color.White,
@@ -144,7 +157,7 @@ fun ProfileScreen(navController: NavController) {
                         Spacer(modifier = Modifier.padding(16.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                            horizontalArrangement = Arrangement.Center,
                         ) {
                             Button(
                                 onClick = {
@@ -310,13 +323,32 @@ fun ProfileScreen(navController: NavController) {
                                 color = Color.White
                             )
                             Spacer(modifier = Modifier.height(32.dp))
-                            Text(
-                                text = "Code ami : ${friendCode ?: "Code ami non trouvé"}",
-                                fontSize = 18.sp,
-                                color = Color.White
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ){
+                                Text(
+                                    text = "Code ami : ${friendCode ?: "Code ami non trouvé"}",
+                                    fontSize = 18.sp,
+                                    color = Color.White
+                                )
+                                Button(
+                                    onClick = {
+                                        textCopyThenPost(friendCode)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = Color.White,
+                                        containerColor = Color(0xFF0B6623)
+                                    ),
+                                ){
+                                    Icon(
+                                        imageVector = Icons.Outlined.ContentCopy,
+                                        contentDescription = "Copier le code ami",
+                                        tint = Color.White,
+                                    )
+                                }
+                                }
+                            }
                         }
-                    }
                     Spacer(modifier = Modifier.weight(1f))
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -349,7 +381,7 @@ fun ProfileScreen(navController: NavController) {
                                         context.startActivity(intent)
                                     },
                                     onError = { exception ->
-                                        if (exception is com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException) {
+                                        if (exception is FirebaseAuthRecentLoginRequiredException) {
                                             showReauthDialog = true
                                         }
                                     }
@@ -367,9 +399,10 @@ fun ProfileScreen(navController: NavController) {
                             )
                         }
                     }
+                    }
                 }
             }
-        }
+
 
 
     if (showReauthDialog) {

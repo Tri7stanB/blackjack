@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
@@ -90,7 +91,7 @@ fun FriendCard(friend : FriendItem, friendButton : Boolean = false, himself : Bo
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Send,
+                            imageVector = Icons.Filled.AttachMoney,
                             contentDescription = "Envoyer de l'argent",
                         )
                     }
