@@ -298,7 +298,6 @@ fun ProfileScreen(navController: NavController) {
                                     fontSize = 18.sp,
                                     color = Color.White
                                 )
-                                Spacer(modifier = Modifier.weight(1f))
                                 Button(
                                     onClick = {
                                         showDialog = true
@@ -374,18 +373,7 @@ fun ProfileScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                userManager.deleteAccount(
-                                    onComplete = {
-                                        auth.signOut()
-                                        val intent = Intent(context, ConnectionActivity::class.java)
-                                        context.startActivity(intent)
-                                    },
-                                    onError = { exception ->
-                                        if (exception is FirebaseAuthRecentLoginRequiredException) {
-                                            showReauthDialog = true
-                                        }
-                                    }
-                                )
+                                showReauthDialog = true
                             },
                             colors = ButtonDefaults.buttonColors(
                                 contentColor = Color.Red,
@@ -408,17 +396,24 @@ fun ProfileScreen(navController: NavController) {
     if (showReauthDialog) {
         AlertDialog(
             onDismissRequest = { showReauthDialog = false; reauthPassword = ""; reauthError = null },
-            title = { Text("Confirme la suppression") },
+            title = { Text("Es-tu sûr de vouloir supprimer ton compte ?", color = Color.White) },
+            containerColor = Color(0xFF0B6623),
             text = {
                 Column {
-                    Text("Entre ton mot de passe pour confirmer.")
+                    Text("Entre ton mot de passe pour confirmer.", color = Color.White)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = reauthPassword,
                         onValueChange = { reauthPassword = it; reauthError = null },
                         label = { Text("Mot de passe") },
                         singleLine = true,
-                        visualTransformation = PasswordVisualTransformation()
+                        visualTransformation = PasswordVisualTransformation(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.White,
+                            unfocusedLabelColor = Color.White,
+                            focusedLabelColor = Color.White,
+                            cursorColor = Color.White)
                     )
                     reauthError?.let {
                         Spacer(modifier = Modifier.height(4.dp))
@@ -444,10 +439,23 @@ fun ProfileScreen(navController: NavController) {
                             )
                         }
                         .addOnFailureListener { reauthError = "Mot de passe incorrect." }
-                }) { Text("Confirmer") }
+                                 },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.Red,
+                        containerColor = Color(0xFF0B6623)
+                    ),
+                   border = BorderStroke(1.dp, Color.Red),
+                ) {
+                    Text("Confirmer")
+                }
             },
             dismissButton = {
-                Button(onClick = { showReauthDialog = false; reauthPassword = ""; reauthError = null }) {
+                Button(onClick = { showReauthDialog = false; reauthPassword = ""; reauthError = null },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color(0xFF0B6623)
+                    ),
+                    border = BorderStroke(1.dp, Color.White),) {
                     Text("Annuler")
                 }
             }
