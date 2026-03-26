@@ -229,8 +229,8 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 
             // Afficher seulement les boutons de mise
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 listOf(50, 100, 200).forEach { mise ->
                     Button(
@@ -365,7 +365,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
         if (viewModel.message.isNotEmpty() && game.manche > 1) {
             Text("Résultat : ${viewModel.message}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.White)
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
                 listOf(50, 100, 200).forEach { mise ->
                     Button(
                         onClick = {
