@@ -23,7 +23,7 @@ class DailyMoneyManager(context: Context) {
         context.getSharedPreferences("blackjack_prefs_${uid ?: "guest"}", Context.MODE_PRIVATE)
 
     private val gson = Gson()
-    private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     @RequiresApi(Build.VERSION_CODES.O)
     val today = LocalDate.now().toString()
 

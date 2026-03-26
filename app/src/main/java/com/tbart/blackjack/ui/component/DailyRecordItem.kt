@@ -39,7 +39,7 @@ fun DailyRecordItem(record: DailyRecord) {
         ) {
             Text(
                 text = try {
-                    val parsed = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(record.date)
+                    val parsed = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse(record.date)
                     SimpleDateFormat("EEE dd MMM yyyy", Locale.FRENCH).format(parsed!!)
                 } catch (e: Exception) {
                     record.date
