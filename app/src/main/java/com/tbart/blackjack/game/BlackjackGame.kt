@@ -1,10 +1,7 @@
 package com.tbart.blackjack.game
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tbart.blackjack.model.Card
 import com.tbart.blackjack.model.Dealer
@@ -26,6 +23,8 @@ class BlackjackGame {
     var dealerScore by mutableIntStateOf(0)
         private set
 
+    var dealerTurn by mutableIntStateOf(0) // 0 pour false, 1 pour true
+
     fun placeBet(amount: Int): Boolean {
         return if (amount > 0 && amount <= player.money) {
             mise = amount
@@ -35,7 +34,7 @@ class BlackjackGame {
         }
     }
 
-    fun startGame(){
+    fun startGame() {
 
 //        if (player.money<mise){
 //            throw IllegalArgumentException("Le joueur n'a pas assez d'argent pour miser")
@@ -47,6 +46,7 @@ class BlackjackGame {
         deck.shuffle()
         manche++
         player.money -= mise
+        dealerTurn = 0
 
 
         repeat(2) {
@@ -80,12 +80,13 @@ class BlackjackGame {
     }
 
     suspend fun dealerTurn() {
+        dealerTurn = 1
         dealer.hand.getAllCards()[1].revealed = true
         updateScores()
-        delay(1500)
+        delay(1000)
 
         while (dealer.hand.getScore() < 17) {
-            delay(1000)
+            delay(500)
             dealer.hand.addCard(deck.drawCard(), true)
             updateScores()
         }
@@ -111,7 +112,8 @@ class BlackjackGame {
 
                 for (i in 0..sortedRanks.size - 3) {
                     if (sortedRanks[i] + 1 == sortedRanks[i + 1] &&
-                        sortedRanks[i] + 2 == sortedRanks[i + 2]) {
+                        sortedRanks[i] + 2 == sortedRanks[i + 2]
+                    ) {
                         return true
                     }
                 }
@@ -124,7 +126,8 @@ class BlackjackGame {
         val playerCards = player.hand.getCardsRevealed().toMutableList()
         playerCards.addAll(dealer.hand.getCardsRevealed())
         if (playerCards[0].rank.sequenceValue() == playerCards[1].rank.sequenceValue() &&
-            playerCards[1].rank.sequenceValue() == playerCards[2].rank.sequenceValue()) {
+            playerCards[1].rank.sequenceValue() == playerCards[2].rank.sequenceValue()
+        ) {
             return true
         }
         return false
@@ -136,7 +139,8 @@ class BlackjackGame {
         playerCards.sortBy { it.rank.sequenceValue() }
         for (i in 0 until playerCards.size - 2) {
             if (playerCards[i].rank.sequenceValue() + 1 == playerCards[i + 1].rank.sequenceValue() &&
-                playerCards[i + 1].rank.sequenceValue() + 1 == playerCards[i + 2].rank.sequenceValue()) {
+                playerCards[i + 1].rank.sequenceValue() + 1 == playerCards[i + 2].rank.sequenceValue()
+            ) {
                 return true
             }
         }

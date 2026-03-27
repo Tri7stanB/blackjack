@@ -352,7 +352,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                             }
                         }
                     },
-                    enabled = !viewModel.gameOver,
+                    enabled = (!viewModel.gameOver && game.dealerTurn == 0),
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color.White,
                         containerColor = Color(0xFF0B6623)
@@ -364,6 +364,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 
                 Button(
                     onClick = {
+                        game.dealerTurn = 1
                         coroutineScope.launch {
                             game.dealerTurn()
                             viewModel.gameOver = true
@@ -382,7 +383,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                             }
                         }
                     },
-                    enabled = !viewModel.gameOver,
+                    enabled = (!viewModel.gameOver && game.dealerTurn == 0),
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color.White,
                         containerColor = Color(0xFF0B6623)
