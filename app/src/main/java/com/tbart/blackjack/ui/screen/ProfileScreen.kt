@@ -438,22 +438,25 @@ fun ProfileScreen(navController: NavController) {
             confirmButton = {
                 Button(
                     onClick = {
-                        val user = auth.currentUser ?: return@Button
-                        val email = user.email ?: return@Button
-                        val credential = EmailAuthProvider.getCredential(email, reauthPassword)
-                        user.reauthenticate(credential)
-                            .addOnSuccessListener {
-                                showReauthDialog = false
-                                reauthPassword = ""
-                                userManager.deleteAccount(
-                                    onComplete = {
-                                        auth.signOut()
-                                        val intent = Intent(context, ConnectionActivity::class.java)
-                                        context.startActivity(intent)
-                                    }
-                                )
-                            }
-                            .addOnFailureListener { reauthError = "Mot de passe incorrect." }
+                        if (reauthPassword != "") {
+                            val user = auth.currentUser ?: return@Button
+                            val email = user.email ?: return@Button
+                            val credential = EmailAuthProvider.getCredential(email, reauthPassword)
+                            user.reauthenticate(credential)
+                                .addOnSuccessListener {
+                                    showReauthDialog = false
+                                    reauthPassword = ""
+                                    userManager.deleteAccount(
+                                        onComplete = {
+                                            auth.signOut()
+                                            val intent =
+                                                Intent(context, ConnectionActivity::class.java)
+                                            context.startActivity(intent)
+                                        }
+                                    )
+                                }
+                                .addOnFailureListener { reauthError = "Mot de passe incorrect." }
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color.Red,
