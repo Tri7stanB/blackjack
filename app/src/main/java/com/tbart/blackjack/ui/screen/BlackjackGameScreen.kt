@@ -1,49 +1,25 @@
 package com.tbart.blackjack.ui.screen
 
-import android.R
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.tbart.blackjack.game.BlackjackGame
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
@@ -51,14 +27,26 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tbart.blackjack.data.manager.BlackjackManager
-import com.tbart.blackjack.data.manager.UserManager
-import com.tbart.blackjack.viewmodel.BlackjackViewModel
-import com.tbart.blackjack.ui.navigation.Screen
 import com.tbart.blackjack.ui.component.CardImage
+import com.tbart.blackjack.ui.navigation.Screen
+import com.tbart.blackjack.viewmodel.BlackjackViewModel
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -71,10 +59,12 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
         drawerState = drawerState,
         drawerContent = {
             // C'est ici que vous dessinez le contenu de votre menu
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier.width(180.dp)
+            ) {
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Jouer", fontSize = 30.sp) },
+                    label = { Text("Jouer", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -85,7 +75,18 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Historique", fontSize = 30.sp) },
+                    label = { Text("Règles", fontSize = 24.sp) },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screen.RulesScreen.route)
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                NavigationDrawerItem(
+                    label = { Text("Historique", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -96,7 +97,7 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Amis", fontSize = 30.sp) },
+                    label = { Text("Amis", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -107,7 +108,7 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Profil", fontSize = 30.sp) },
+                    label = { Text("Profil", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -122,7 +123,7 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
         Scaffold(
             topBar = {
                 Button(
-                    onClick = { scope.launch { drawerState.open() }},
+                    onClick = { scope.launch { drawerState.open() } },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent
                     )
@@ -187,7 +188,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
         Row() {
             Spacer(modifier = Modifier.weight(1f))
 
-            Card (
+            Card(
                 modifier = Modifier.padding(10.dp),
                 shape = RoundedCornerShape(1.dp),
                 colors = CardDefaults.cardColors(
@@ -200,13 +201,20 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                     modifier = Modifier
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     // Affiche currentMoney (état Compose) avant la partie, game.player.money pendant la partie
-                    val displayMoney = if (viewModel.waitingForBet) currentMoney else game.player.money
-                    Text("Argent : $displayMoney", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                    val displayMoney =
+                        if (viewModel.waitingForBet) currentMoney else game.player.money
+                    Text(
+                        "Argent : $displayMoney",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    )
 
                 }
-        }
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -261,133 +269,166 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
             }
 
         } else {
-        // --- Zone Croupier ---
-        Column() {
-            Text("Croupier", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(start = 10.dp))
-            Spacer(Modifier.padding(5.dp))
-            Row(
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .horizontalScroll(dealerScrollState)
-            ) {
-                game.getDealerCards().forEach { card ->
-                    CardImage(rank = card.rank.toString(), suit = card.suit.toString())
-                }
-            }
-            Spacer(Modifier.padding(5.dp))
-            Text("Score: ${game.dealerScore}", color = Color.White, modifier = Modifier.padding(start = 10.dp))
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // --- Zone Joueur ---
-        Column() {
-            Text("Joueur", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(start = 10.dp))
-            Spacer(Modifier.padding(5.dp))
-            Row (
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .horizontalScroll(playerScrollState)
-            ){
-                game.getPlayerCards().forEach { card ->
-                    CardImage(rank = card.rank.toString(), suit = card.suit.toString())
-                }
-            }
-            Spacer(Modifier.padding(5.dp))
-            Text("Score: ${game.playerScore}", color = Color.White, modifier = Modifier.padding(start = 10.dp))
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // --- Boutons Actions ---
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Button(
-                onClick = {
-                    game.playerHits()
-                    if (game.isPlayerBusted()) {
-                        viewModel.gameOver = true
-                        viewModel.winner = game.determineWinner()
-                        viewModel.message = if (viewModel.winner == 1) {
-                            game.handleWin(2)
-                            viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "Gagné !"
-                        } else if (viewModel.winner == 2) {
-                            viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "Perdu !"
-                        } else {
-                            game.handleDraw()
-                            viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "Égalité !"
-                        }
-                    }
-                },
-                enabled = !viewModel.gameOver,
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = Color.White,
-                    containerColor = Color(0xFF0B6623)
-                ),
-                border = BorderStroke(1.dp, Color.White),            ) {
-                Text("Tirer", color = Color.White)
-            }
-
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        game.dealerTurn()
-                        viewModel.gameOver = true
-                        viewModel.winner = game.determineWinner()
-                        viewModel.message = if (viewModel.winner == 1) {
-                            game.handleWin(2)
-                            viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "Gagné !"
-                        } else if (viewModel.winner == 2) {
-                            viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "Perdu !"
-                        } else {
-                            game.handleDraw()
-                            viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            "Égalité !"
-                        }
-                    }
-                },
-                enabled = !viewModel.gameOver,
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = Color.White,
-                    containerColor = Color(0xFF0B6623)
-                ),
-                border = BorderStroke(1.dp, Color.White),
+            // --- Zone Croupier ---
+            Column() {
+                Text(
+                    "Croupier",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+                Spacer(Modifier.padding(5.dp))
+                Row(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .horizontalScroll(dealerScrollState)
                 ) {
-                Text("Rester", color = Color.White)
-            }
-        }
-
-        // --- Zone Résultat & Relance ---
-        if (viewModel.message.isNotEmpty() && game.manche > 1) {
-            Text("Résultat : ${viewModel.message}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.White)
-
-            Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                listOf(50, 100, 200).forEach { mise ->
-                    Button(
-                        onClick = {
-                            if (game.placeBet(mise)) {
-                                viewModel.gameOver = false
-                                viewModel.message = ""
-                                game.startGame()
-                                if (viewModel.selected21plus3) game.player.money -= game.mise
-                                viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                            } else {
-                                viewModel.message = "Mise invalide"
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            contentColor = Color.White,
-                            containerColor = Color(0xFF0B6623)
-                        ),
-                        border = BorderStroke(1.dp, Color.White),                    ) {
-                        Text("Miser $mise", color = Color.White)
+                    game.getDealerCards().forEach { card ->
+                        CardImage(rank = card.rank.toString(), suit = card.suit.toString())
                     }
                 }
+                Spacer(Modifier.padding(5.dp))
+                Text(
+                    "Score: ${game.dealerScore}",
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // --- Zone Joueur ---
+            Column() {
+                Text(
+                    "Joueur",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+                Spacer(Modifier.padding(5.dp))
+                Row(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .horizontalScroll(playerScrollState)
+                ) {
+                    game.getPlayerCards().forEach { card ->
+                        CardImage(rank = card.rank.toString(), suit = card.suit.toString())
+                    }
+                }
+                Spacer(Modifier.padding(5.dp))
+                Text(
+                    "Score: ${game.playerScore}",
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // --- Boutons Actions ---
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Button(
+                    onClick = {
+                        game.playerHits()
+                        if (game.isPlayerBusted()) {
+                            viewModel.gameOver = true
+                            viewModel.winner = game.determineWinner()
+                            viewModel.message = if (viewModel.winner == 1) {
+                                game.handleWin(2)
+                                viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
+                                "Gagné !"
+                            } else if (viewModel.winner == 2) {
+                                viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
+                                "Perdu !"
+                            } else {
+                                game.handleDraw()
+                                viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
+                                "Égalité !"
+                            }
+                        }
+                    },
+                    enabled = !viewModel.gameOver,
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color(0xFF0B6623)
+                    ),
+                    border = BorderStroke(1.dp, Color.White),
+                ) {
+                    Text("Tirer", color = Color.White)
+                }
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            game.dealerTurn()
+                            viewModel.gameOver = true
+                            viewModel.winner = game.determineWinner()
+                            viewModel.message = if (viewModel.winner == 1) {
+                                game.handleWin(2)
+                                viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
+                                "Gagné !"
+                            } else if (viewModel.winner == 2) {
+                                viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
+                                "Perdu !"
+                            } else {
+                                game.handleDraw()
+                                viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
+                                "Égalité !"
+                            }
+                        }
+                    },
+                    enabled = !viewModel.gameOver,
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color(0xFF0B6623)
+                    ),
+                    border = BorderStroke(1.dp, Color.White),
+                ) {
+                    Text("Rester", color = Color.White)
+                }
+            }
+
+            // --- Zone Résultat & Relance ---
+            if (viewModel.message.isNotEmpty() && game.manche > 1) {
+                Text(
+                    "Résultat : ${viewModel.message}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color.White
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf(50, 100, 200).forEach { mise ->
+                        Button(
+                            onClick = {
+                                if (game.placeBet(mise)) {
+                                    viewModel.gameOver = false
+                                    viewModel.message = ""
+                                    game.startGame()
+                                    if (viewModel.selected21plus3) game.player.money -= game.mise
+                                    viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
+                                } else {
+                                    viewModel.message = "Mise invalide"
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = Color.White,
+                                containerColor = Color(0xFF0B6623)
+                            ),
+                            border = BorderStroke(1.dp, Color.White),
+                        ) {
+                            Text("Miser $mise", color = Color.White)
+                        }
+                    }
+                }
 
 //            Button(
 //                onClick = { viewModel.selected21plus3 = !viewModel.selected21plus3 },
@@ -403,6 +444,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 //                if (viewModel.selected21plus3) "Mise 21+3 active" else "Mise 21+3 inactive",
 //                color = Color.White
 //            )
+            }
         }
-    }}
+    }
 }

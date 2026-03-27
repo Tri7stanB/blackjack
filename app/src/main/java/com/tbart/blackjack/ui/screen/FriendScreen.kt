@@ -1,11 +1,8 @@
 package com.tbart.blackjack.ui.screen
 
-import android.R
-import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,21 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.AlertDialog
-
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -46,26 +34,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import kotlinx.coroutines.launch
-import java.util.Locale
-import java.util.Locale.getDefault
 import com.tbart.blackjack.data.manager.FriendManager
 import com.tbart.blackjack.data.manager.UserManager
 import com.tbart.blackjack.data.model.FriendItem
 import com.tbart.blackjack.ui.component.FriendCard
 import com.tbart.blackjack.ui.navigation.Screen
+import kotlinx.coroutines.launch
+import java.util.Locale.getDefault
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,10 +78,12 @@ fun FriendScreen(navController: NavController) {
         drawerState = drawerState,
         drawerContent = {
             // C'est ici que vous dessinez le contenu de votre menu
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier.width(180.dp)
+            ) {
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Jouer", fontSize = 30.sp) },
+                    label = { Text("Jouer", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -110,7 +94,18 @@ fun FriendScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Historique", fontSize = 30.sp) },
+                    label = { Text("Règles", fontSize = 24.sp) },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screen.RulesScreen.route)
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                NavigationDrawerItem(
+                    label = { Text("Historique", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -121,7 +116,7 @@ fun FriendScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Amis", fontSize = 30.sp) },
+                    label = { Text("Amis", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -132,7 +127,7 @@ fun FriendScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Profil", fontSize = 30.sp) },
+                    label = { Text("Profil", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -149,7 +144,7 @@ fun FriendScreen(navController: NavController) {
             topBar = {
                 // Optionnel : Une petite barre pour ouvrir le menu
                 Button(
-                    onClick = { scope.launch { drawerState.open() }},
+                    onClick = { scope.launch { drawerState.open() } },
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent
                     )
@@ -172,13 +167,17 @@ fun FriendScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
                     verticalAlignment = androidx.compose.ui.Alignment.Bottom
-                ){
+                ) {
                     var friendInput by remember { mutableStateOf("") }
                     OutlinedTextField(
                         value = friendInput.uppercase(getDefault()),
                         onValueChange = { if (it.length <= 6) friendInput = it },
-                        label = { Text("Ajouter un ami")},
-                        textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                        label = { Text("Ajouter un ami") },
+                        textStyle = TextStyle(
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        ),
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                         colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
@@ -186,7 +185,8 @@ fun FriendScreen(navController: NavController) {
                             unfocusedBorderColor = Color.White,
                             unfocusedLabelColor = Color.White,
                             focusedLabelColor = Color.White,
-                            cursorColor = Color.White),
+                            cursorColor = Color.White
+                        ),
                         trailingIcon = {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
@@ -203,8 +203,7 @@ fun FriendScreen(navController: NavController) {
                             friendManager.searchFriend(friendInput.uppercase()) { friend ->
                                 if (friend != null) {
                                     searchedFriend = friend
-                                }
-                                else {
+                                } else {
                                     searchedFriend = null
                                 }
                             }
@@ -226,13 +225,16 @@ fun FriendScreen(navController: NavController) {
                 }
                 searchedFriend?.let { friend ->
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Résultat", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 24.sp
+                    Text(
+                        "Résultat",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 24.sp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    if (searchedFriend!!.playerId == friendCode){
+                    if (searchedFriend!!.playerId == friendCode) {
                         FriendCard(friend, true, true)
-                    }
-                    else {
+                    } else {
                         FriendCard(friend, true)
                     }
                 }

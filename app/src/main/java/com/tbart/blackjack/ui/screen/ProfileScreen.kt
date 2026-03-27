@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -209,10 +210,12 @@ fun ProfileScreen(navController: NavController) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier.width(180.dp)
+            ) {
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Jouer", fontSize = 30.sp) },
+                    label = { Text("Jouer", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -223,7 +226,18 @@ fun ProfileScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Historique", fontSize = 30.sp) },
+                    label = { Text("Règles", fontSize = 24.sp) },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screen.RulesScreen.route)
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                NavigationDrawerItem(
+                    label = { Text("Historique", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -234,7 +248,7 @@ fun ProfileScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Amis", fontSize = 30.sp) },
+                    label = { Text("Amis", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -245,7 +259,7 @@ fun ProfileScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 NavigationDrawerItem(
-                    label = { Text("Profil", fontSize = 30.sp) },
+                    label = { Text("Profil", fontSize = 24.sp) },
                     selected = false,
                     onClick = {
                         scope.launch {
