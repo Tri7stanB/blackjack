@@ -396,29 +396,28 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 
             // --- Zone Résultat & Relance ---
             if (viewModel.message.isNotEmpty() && game.manche > 1) {
-                Column(
-                ){
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                            .align(Alignment.CenterHorizontally),
-                        shape = RoundedCornerShape(5.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (viewModel.winner == 1) Color.Green else if (viewModel.winner == 2) Color.Red else Color.White,
-                            contentColor = if (viewModel.winner == 2) Color.White else Color.Black
-                        ),
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
+                    shape = RoundedCornerShape(5.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (viewModel.winner == 1) Color.Green else if (viewModel.winner == 2) Color.Red else Color.White,
+                        contentColor = if (viewModel.winner == 2) Color.White else Color.Black
+                    ),
 
-                        ){
-                        Text(
-                            viewModel.message,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                        )
-                    }
+                    ) {
+                    Text(
+                        viewModel.message,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                    )
                 }
+
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,

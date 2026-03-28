@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.tbart.blackjack.data.manager.BlackjackManager
 import com.tbart.blackjack.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
@@ -43,6 +45,8 @@ import kotlinx.coroutines.launch
 fun RulesScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val blackjackManager = remember { BlackjackManager() }
 
 
     ModalNavigationDrawer(
@@ -133,6 +137,7 @@ fun RulesScreen(navController: NavController) {
                 ) {
                     FloatingActionButton(
                         onClick = {
+                            blackjackManager.markRulesAsSeen()
                             scope.launch {
                                 navController.navigate(Screen.GameScreen.route)
                             }
