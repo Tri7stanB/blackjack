@@ -296,7 +296,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // --- Zone Joueur ---
             Column() {
@@ -325,7 +325,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // --- Boutons Actions ---
             Row(
@@ -396,12 +396,29 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 
             // --- Zone Résultat & Relance ---
             if (viewModel.message.isNotEmpty() && game.manche > 1) {
-                Text(
-                    "Résultat : ${viewModel.message}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color.White
-                )
+                Column(
+                ){
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                            .align(Alignment.CenterHorizontally),
+                        shape = RoundedCornerShape(5.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (viewModel.winner == 1) Color.Green else if (viewModel.winner == 2) Color.Red else Color.White,
+                            contentColor = if (viewModel.winner == 2) Color.White else Color.Black
+                        ),
+
+                        ){
+                        Text(
+                            viewModel.message,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                        )
+                    }
+                }
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
