@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -33,14 +35,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.tbart.blackjack.data.manager.BlackjackManager
 import com.tbart.blackjack.ui.component.CardImage
@@ -48,12 +54,14 @@ import com.tbart.blackjack.ui.navigation.Screen
 import com.tbart.blackjack.viewmodel.BlackjackViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BlackjackGameScreen(navController: NavHostController, gameViewModel: BlackjackViewModel) {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -141,7 +149,6 @@ fun BlackjackGameScreen(navController: NavHostController, gameViewModel: Blackja
     }
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewModel) {
@@ -150,6 +157,7 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
 
     val game = viewModel.game
     val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
 
     val playerScrollState = rememberScrollState()
     val dealerScrollState = rememberScrollState()
@@ -161,6 +169,13 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
     // Synchroniser l'argent du joueur AVANT le début de la partie
     if (viewModel.waitingForBet) {
         game.player.money = currentMoney
+    }
+
+    // Afficher automatiquement le dialog si le joueur n'a plus d'argent
+    LaunchedEffect(currentMoney) {
+        if (currentMoney == 0 && viewModel.waitingForBet) {
+            showDialog = true
+        }
     }
 
     LaunchedEffect(playerScrollState.maxValue) {
@@ -252,6 +267,8 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                                 game.startGame()  // ← MAINTENANT on démarre
                                 Log.d("BLACKJACK_DEBUG", "🎮 Partie démarrée")
 
+                            } else if (game.player.money == 0) {
+                                showDialog = true
                             } else {
                                 Log.d("BLACKJACK_DEBUG", "❌ Mise refusée")
                                 viewModel.message = "Mise invalide"
@@ -432,7 +449,11 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
                                     game.startGame()
                                     if (viewModel.selected21plus3) game.player.money -= game.mise
                                     viewModel.updateMoney(game.player.money) // SAUVEGARDER ICI
-                                } else {
+                                }
+                                else if (game.player.money==0){
+                                    showDialog = true
+                                }
+                                    else {
                                     viewModel.message = "Mise invalide"
                                 }
                             },
@@ -464,4 +485,54 @@ fun BlackjackContent(modifier: Modifier = Modifier, viewModel: BlackjackViewMode
             }
         }
     }
+
+    // Dialog quand le joueur n'a plus d'argent
+    if (showDialog) {
+        Dialog(
+            onDismissRequest = { showDialog = false },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            ),
+            content = {
+                Card(
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF0B6623),
+                        contentColor = Color.White
+                    ),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        Text(
+                            "Tu es à sec ! Reviens demain ou demande à un ami de t'envoyer de l'argent pour continuer à jouer.",
+                            modifier = Modifier.padding(8.dp),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                showDialog = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = Color.White,
+                                containerColor = Color(0xFF0B6623)
+                            ),
+                            border = BorderStroke(1.dp, Color.White)
+                        ) {
+                            Text(
+                                text = "J'ai compris",
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        )
+    }
+
 }
