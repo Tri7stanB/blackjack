@@ -32,6 +32,8 @@ class DailyReminderWorker(context: Context, params: WorkerParameters) : Worker(c
             sendNotification()
         }
 
+        NotificationScheduler.scheduleDailyReminder(applicationContext)
+
         return Result.success()
     }
 
@@ -55,7 +57,8 @@ class DailyReminderWorker(context: Context, params: WorkerParameters) : Worker(c
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent: PendingIntent =
+            PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
 
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)

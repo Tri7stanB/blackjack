@@ -1,8 +1,8 @@
 package com.tbart.blackjack.data.worker
 
 import android.content.Context
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -14,13 +14,13 @@ object NotificationScheduler {
     fun scheduleDailyReminder(context: Context) {
         val delay = computeDelayUntil17h()
 
-        val request = PeriodicWorkRequestBuilder<DailyReminderWorker>(24, TimeUnit.HOURS)
+        val request = OneTimeWorkRequestBuilder<DailyReminderWorker>()
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .build()
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        WorkManager.getInstance(context).enqueueUniqueWork(
             WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingWorkPolicy.REPLACE,
             request
         )
     }
